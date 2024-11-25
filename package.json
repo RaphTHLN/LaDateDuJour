@@ -4,6 +4,7 @@
     "dotenv": "^16.4.5",
     "google-trends-api-code": "^4.9.10",
     "init": "^0.1.2",
+    "undici": "^6.21.0",
     "wikipedia": "^2.1.2"
   }
 }

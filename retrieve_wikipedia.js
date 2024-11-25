@@ -50,7 +50,7 @@ async function retryWithDelay(fn, retries, delay) {
             deaths.push({
                 year: element.year,
                 name,
-                description: `est un(e) ${summary.description}`,
+                description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
                 popularity: trending !== null ? trending : 0,
             });
         }
@@ -77,7 +77,7 @@ async function retryWithDelay(fn, retries, delay) {
             births.push({
                 year: element.year,
                 name,
-                description: `est un(e) ${summary.description}`,
+                description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
                 popularity: trending !== null ? trending : 0,
             });
         }
