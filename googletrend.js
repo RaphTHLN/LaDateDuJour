@@ -3,14 +3,16 @@
 /*              Partie Google Trend              */
 /*             (voir les plus connus)            */
 /*                    Terminé                    */
-/*          Mais on va peut-être changer         */
-/*             ( problème de quota )             */
 /*                                               */
 /* ********************************************* */
 
 const googleTrends = require('google-trends-api-code');
 
 async function getTrending(keyword) {
+    if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
+        throw 'Keyword field is missing';
+    }
+
     const today = new Date();
 
     const oneYearEarlier = new Date(today);
