@@ -1,4 +1,21 @@
 {
+  "name": "ladatedujour",
+  "version": "1.0.0",
+  "description": "\"La Date du Jour\" est un bot Discord qui publie automatiquement chaque jour à minuit des informations sur les événements historiques, anniversaires, décès, fêtes et journées internationales dans un channel Discord à 00H",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RaphTHLN/LaDateDuJour.git"
+  },
+  "author": "AlbaDev, Tatime, StaaRCord",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RaphTHLN/LaDateDuJour/issues"
+  },
+  "homepage": "https://github.com/RaphTHLN/LaDateDuJour#readme",
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
