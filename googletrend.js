@@ -9,7 +9,6 @@
 const googleTrends = require('google-trends-api-code');
 
 async function getTrending(keyword) {
-    return 1;
     if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
         throw 'Keyword field is missing';
     }
