@@ -1,16 +1,19 @@
 /* ********************************************* */
 /*                                               */
 /*                 Partie Discord                */
+/*                    Terminé                    */
 /*                                               */
 /* ********************************************* */
 
 require('dotenv').config();
 const { token } = process.env;
+const fs = require('fs');
 const { Client, Collection, Partials } = require('discord.js');
 const { SearchOnThisDay } = require('./retrieve_wikipedia');
 const {User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent} = Partials;
-const channelid = "1240001870865498184";
-const roleid = "1167616651265577003";
+const channelid = "907720804316368956";
+const roleid = "1307842734240956547";
+const birthdaynamefile = './anniversaires.json'
 
 const client = new Client({ intents: '3276799', partials: [User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent ] });
 
@@ -31,9 +34,60 @@ function Top3(data) {
         .sort((a, b) => a.annee - b.annee);
 }
 
-client.on('ready', async() => {
-    console.log(`${client.user.username} is ready !`)
+const checkBirthdays = async () => {
 
+    const birthdayfile = JSON.parse(fs.readFileSync(birthdaynamefile, 'utf8'));
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth() + 1;
+
+    let results = [];
+
+    birthdayfile.forEach(user => {
+        if (user.jour === todayDay && user.mois === todayMonth) {
+            let age = null;
+            if (user.annee) {
+                age = user.annee
+            }
+            results.push({
+                identifiant: user.identifiant,
+                age: age,
+                genre: user.genre
+            });
+        }
+    });
+
+    if (results.length > 0) {
+        return results;
+    } else {
+        return null;
+    }
+}; 
+
+function splitText(text, maxLength = 2000) {
+    const parts = [];
+
+    while (text.length > maxLength) {
+        let splitIndex = text.lastIndexOf('\n', maxLength);
+
+        if (splitIndex === -1) {
+            splitIndex = maxLength;
+        }
+
+        parts.push(text.slice(0, splitIndex));
+
+        text = text.slice(splitIndex).trimStart();
+    }
+
+    if (text) {
+        parts.push(text);
+    }
+
+    return parts;
+}
+
+async function laDateDuJour(){
     const date = new Date();
     date.setDate(date.getDate() + 1);
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -42,11 +96,12 @@ client.on('ready', async() => {
     const formattedDate2 = new Intl.DateTimeFormat('fr-FR', options2).format(date);
 
     const channel = await client.channels.fetch(channelid);
-    const ladatedujour = await SearchOnThisDay()
+    const ladatedujour = await SearchOnThisDay();
+    const anniversaires = await checkBirthdays();
 
     const topEvenements = ladatedujour.elementshistoriques
         .sort((a, b) => b.year - a.year)
-        .slice(0, 4)
+        .slice(0, 5)
         .sort((a, b) => a.year - b.year)
         .map(evenements => `**${evenements.year}** : ${evenements.text}`)
         .join('\n\n');
@@ -62,11 +117,16 @@ client.on('ready', async() => {
     const topFetes = ladatedujour.holidays
         .map(fete => `${fete.text}`)
         .join('\n\n');
+    
+    let anniversairesMessage = '';
+    if(anniversaires !== null){
+        for (const element of anniversaires) {
+            anniversairesMessage += `**${element.age ? element.age : '????'}** : C'est l'anniversaire de <@${element.identifiant}>`;
+        }
+    }
 
-    const millisecondes = tempsavantminuit();
-
-    setTimeout(async () => {
-        await channel.send(`# Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>\n
+    const message = `||<@&${roleid}>||
+# Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>\n
 ## Bon anniversaire à ceux qui sont nés un ${formattedDate2} ! :tada:\n
 
 
@@ -78,6 +138,7 @@ ${topEvenements}
 
 ${topNaissances}
 
+${anniversairesMessage}
 ### - Décès :
 
 ${topMorts}
@@ -92,10 +153,26 @@ Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)
 Popularité : [Google Trends](<https://trends.google.fr/trends/>)
 
 
-**Envoyé par : <@${client.user.id}>**
+**Envoyé par : <@${client.user.id}>**`
 
-||<@&${roleid}>||`)
+    const millisecondes = tempsavantminuit();
+
+    setTimeout(async () => {
+        const splitParts = splitText(message)
+
+        for (const [index, part] of splitParts.entries()) {
+            await channel.send(part);
+            console.log(`Partie ${index + 1} envoyée :)`);
+        }
+        setTimeout(async () => {
+            laDateDuJour()
+        }, 60000)
     }, millisecondes)
+}
+
+client.on('ready', async () => {
+    console.log(`${client.user.username} is ready !`)
+    laDateDuJour()
 })
 
 

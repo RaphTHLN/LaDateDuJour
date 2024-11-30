@@ -28,35 +28,50 @@ async function retryWithDelay(fn, retries, delay) {
     }
 }
 
+function justName(input) {
+    const commaIndex = input.indexOf(',');
+    const parenthesisIndex = input.indexOf('(');
+
+    const firstIndex = [commaIndex, parenthesisIndex]
+        .filter(index => index !== -1)
+        .sort((a, b) => a - b)[0];
+
+    return firstIndex !== undefined ? input.slice(0, firstIndex).trim() : input.trim();
+}
+
 async function SearchOnThisDay(){
     try {
         await wiki.setLang("fr");
 
         const date = new Date();
-        const options = { day: 'numeric' };
-        const formattedDate = new Intl.DateTimeFormat('fr-FR', options).format(date);
-        const options2 = { month: 'numeric' };
-        const formattedDate2 = new Intl.DateTimeFormat('fr-FR', options2).format(date);
+        date.setDate(date.getDate() + 1);
 
-        const events = await wiki.onThisDay({ month: `${formattedDate2}`, day: `${parseInt(formattedDate) + 1}` });
+        const optionsDay = { day: 'numeric' };
+        const formattedDay = new Intl.DateTimeFormat('fr-FR', optionsDay).format(date); 
+        const optionsMonth = { month: 'numeric' };
+        const formattedMonth = new Intl.DateTimeFormat('fr-FR', optionsMonth).format(date);
+
+        const events = await wiki.onThisDay({ month: formattedMonth, day: formattedDay });
 
         let deaths = [];
 
         for (const element of events.deaths) {
-            const name = element.pages[0]?.normalizedtitle;
+            const name = await justName(element.text);
 
             if(name && name !== ""){
-                const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
+                try{
+                    const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
 
-                const page = await wiki.page(name);
-                const summary = await page.summary({redirect: false});
+                    const page = await wiki.page(name);
+                    const summary = await page.summary({redirect: false});
 
-                deaths.push({
-                    year: element.year,
-                    name,
-                    description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
-                    popularity: trending !== null ? trending : 0,
-                });
+                    deaths.push({
+                        year: element.year,
+                        name,
+                        description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
+                        popularity: trending !== null ? trending : 0,
+                    });
+                }catch(err){}
             }
         }
 
@@ -65,26 +80,28 @@ async function SearchOnThisDay(){
         let births = [];
 
         for (const element of events.births) {
-            const name = element.pages[0]?.normalizedtitle;
+            const name = await justName(element.text);
 
             if(name && name !== ""){
-                const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
+                try{
+                    const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
 
-                const page = await wiki.page(name);
-                const summary = await page.summary({redirect: false});
+                    const page = await wiki.page(name);
+                    const summary = await page.summary({redirect: false});
 
-                births.push({
-                    year: element.year,
-                    name,
-                    description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
-                    popularity: trending !== null ? trending : 0,
-                });
+                    births.push({
+                        year: element.year,
+                        name,
+                        description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
+                        popularity: trending !== null ? trending : 0,
+                    });
+                }catch(err){}
             }
         }
 
         births.sort((a, b) => b.popularity - a.popularity);
 
-        const holidays = events.holidays.slice(0, 3);
+        const holidays = events.holidays.slice(0, 4);
 
         return {
             elementshistoriques: events.selected,

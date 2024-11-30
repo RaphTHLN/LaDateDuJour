@@ -1,0 +1,111 @@
+[
+    {
+        "jour": 1,
+        "mois": 12,
+        "identifiant": "645286836301987862",
+        "annee": 2004
+    },
+    {
+        "jour": 7,
+        "mois": 12,
+        "identifiant": "1193261469471613060"
+    },
+    {
+        "jour": 10,
+        "mois": 12,
+        "identifiant": "1121044049084813324",
+        "annee": 2007  
+    },
+    {
+        "jour": 20,
+        "mois": 12,
+        "identifiant": "617730054021054473",
+        "annee": 2006
+    },
+    {
+        "jour": 31,
+        "mois": 12,
+        "identifiant": "613040186057818125",
+        "annee": 2007
+    },
+    {
+        "jour": 19,
+        "mois": 2,
+        "identifiant": "349844331903057920",
+        "annee": 2006
+    },
+    {
+        "jour": 24,
+        "mois": 2,
+        "identifiant": "729365390198833263"
+    },
+    {
+        "jour": 2,
+        "mois": 3,
+        "identifiant": "504315887541551104"
+    },
+    {
+        "jour": 4,
+        "mois": 3,
+        "identifiant": "864075420067168308",
+        "annee": 2008
+    },
+    {
+        "jour": 16,
+        "mois": 3,
+        "identifiant": "1087813804269785111"
+    },
+    {
+        "jour": 20,
+        "mois": 3,
+        "identifiant": "690521141852242000",
+        "annee": 2006
+    },
+    {
+        "jour": 6,
+        "mois": 4,
+        "identifiant": "874318854384386109",
+        "annee": 2011
+    },
+    {
+        "jour": 8,
+        "mois": 4,
+        "identifiant": "789376031932547082",
+        "annee": 2006
+    },
+    {
+        "jour": 16,
+        "mois": 4,
+        "identifiant": "826133033069051954"
+    },
+    {
+        "jour": 26,
+        "mois": 6,
+        "identifiant": "361503481904889856",
+        "annee": 2001
+    },
+    {
+        "jour": 30,
+        "mois": 6,
+        "identifiant": "671833582691680269",
+        "annee": 2006
+    },
+    {
+        "jour": 10,
+        "mois": 7,
+        "identifiant": "552506293575745537",
+        "annee": 2008
+    },
+    {
+        "jour": 17,
+        "mois": 8,
+        "identifiant": "484241922647654400",
+        "annee": 2004
+    },
+    {
+        "jour": 13,
+        "mois": 9,
+        "identifiant": "557944868123574272",
+        "annee": 2005
+    }
+]
