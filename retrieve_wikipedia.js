@@ -28,6 +28,14 @@ async function retryWithDelay(fn, retries, delay) {
     }
 }
 
+function formatTitle(urlTitle) {
+    const decodedTitle = decodeURIComponent(urlTitle);
+    
+    const formattedTitle = decodedTitle.replace(/_/g, ' ');
+
+    return formattedTitle;
+}
+
 function justName(input) {
     const commaIndex = input.indexOf(',');
     const parenthesisIndex = input.indexOf('(');
@@ -56,22 +64,25 @@ async function SearchOnThisDay(){
         let deaths = [];
 
         for (const element of events.deaths) {
-            const name = await justName(element.text);
+            try{
+                const url = element.pages[0].content_urls.desktop.page;
+                const pageTitle = formatTitle(url.split('/').pop());
+                const page = await wiki.page(pageTitle);
+                const summary = await page.summary({redirect: false});
+                const name = await justName(summary.titles.normalized);
 
-            if(name && name !== ""){
-                try{
-                    const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
-
-                    const page = await wiki.page(name);
-                    const summary = await page.summary({redirect: false});
-
-                    deaths.push({
-                        year: element.year,
-                        name,
-                        description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
-                        popularity: trending !== null ? trending : 0,
-                    });
-                }catch(err){}
+                console.log(name)
+                const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
+                
+                deaths.push({
+                    year: element.year,
+                    name,
+                    url,
+                    description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
+                    popularity: trending !== null ? trending : 0,
+                });
+            }catch(err){
+                console.log(err)
             }
         }
 
@@ -80,22 +91,25 @@ async function SearchOnThisDay(){
         let births = [];
 
         for (const element of events.births) {
-            const name = await justName(element.text);
+            try{
+                const url = element.pages[0].content_urls.desktop.page;
+                const pageTitle = formatTitle(url.split('/').pop());
+                const page = await wiki.page(pageTitle);
+                const summary = await page.summary({redirect: false});
+                const name = await justName(summary.titles.normalized);
 
-            if(name && name !== ""){
-                try{
-                    const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
-
-                    const page = await wiki.page(name);
-                    const summary = await page.summary({redirect: false});
-
-                    births.push({
-                        year: element.year,
-                        name,
-                        description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
-                        popularity: trending !== null ? trending : 0,
-                    });
-                }catch(err){}
+                console.log(name)
+                const trending = await retryWithDelay(() => getTrending(name), 5, 20000); 
+                
+                births.push({
+                    year: element.year,
+                    name,
+                    url,
+                    description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
+                    popularity: trending !== null ? trending : 0,
+                });
+            }catch(err){
+                console.log(err)
             }
         }
 

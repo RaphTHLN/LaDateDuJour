@@ -13,7 +13,8 @@ const { SearchOnThisDay } = require('./retrieve_wikipedia');
 const {User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent} = Partials;
 const channelid = "907720804316368956";
 const roleid = "1307842734240956547";
-const birthdaynamefile = './anniversaires.json'
+const birthdaynamefile = './anniversaires.json';
+const evenementsnamefile = './evenements_historiques.json';
 
 const client = new Client({ intents: '3276799', partials: [User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent ] });
 
@@ -65,6 +66,32 @@ const checkBirthdays = async () => {
     }
 }; 
 
+const checkEvenements = async () => {
+
+    const evenementsfile = JSON.parse(fs.readFileSync(evenementsnamefile, 'utf8'));
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth() + 1;
+
+    let results = [];
+
+    evenementsfile.forEach(evenement => {
+        if (evenement.jour === todayDay && evenement.mois === todayMonth) {
+            results.push({
+                annee: evenement.annee,
+                text: evenement.texte
+            });
+        }
+    });
+
+    if (results.length > 0) {
+        return results;
+    } else {
+        return null;
+    }
+}; 
+
 function splitText(text, maxLength = 2000) {
     const parts = [];
 
@@ -88,6 +115,7 @@ function splitText(text, maxLength = 2000) {
 }
 
 async function laDateDuJour(){
+    console.log("Démarrage de la création du message pour demain.")
     const date = new Date();
     date.setDate(date.getDate() + 1);
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -98,6 +126,7 @@ async function laDateDuJour(){
     const channel = await client.channels.fetch(channelid);
     const ladatedujour = await SearchOnThisDay();
     const anniversaires = await checkBirthdays();
+    const evenements = await checkEvenements();
 
     const topEvenements = ladatedujour.elementshistoriques
         .sort((a, b) => b.year - a.year)
@@ -107,11 +136,11 @@ async function laDateDuJour(){
         .join('\n\n');
 
     const topMorts = Top3(ladatedujour.deaths)
-        .map(mort => `**${mort.year}** : ${mort.name} ${mort.description} *( Popularité: ${mort.popularity} )*`)
+        .map(mort => `**${mort.year}** : [${mort.name}](<${mort.url}>) ${mort.description} *( Popularité: ${mort.popularity} )*`)
         .join('\n\n');
 
     const topNaissances = Top3(ladatedujour.births)
-        .map(naissance => `**${naissance.year}** : ${naissance.name} ${naissance.description} *( Popularité: ${naissance.popularity} )*`)
+        .map(naissance => `**${naissance.year}** : [${naissance.name}](<${naissance.url}>) ${naissance.description} *( Popularité: ${naissance.popularity} )*`)
         .join('\n\n');
 
     const topFetes = ladatedujour.holidays
@@ -121,8 +150,17 @@ async function laDateDuJour(){
     let anniversairesMessage = '';
     if(anniversaires !== null){
         for (const element of anniversaires) {
-            anniversairesMessage += `**${element.age ? element.age : '????'}** : C'est l'anniversaire de <@${element.identifiant}>`;
+            anniversairesMessage += `**${element.age ? element.age : '????'}** : C'est l'anniversaire de <@${element.identifiant}>\n`;
         }
+        anniversairesMessage += '\n'
+    }
+
+    let evenementsMessage = '';
+    if(evenements !== null){
+        for (const element of evenements) {
+            evenementsMessage += `**${element.annee}** : ${element.text}\n`;
+        }
+        evenementsMessage += '\n'
     }
 
     const message = `||<@&${roleid}>||
@@ -134,12 +172,11 @@ async function laDateDuJour(){
 
 ${topEvenements}
 
-### - Anniversaires :
+${evenementsMessage}### - Anniversaires :
 
 ${topNaissances}
 
-${anniversairesMessage}
-### - Décès :
+${anniversairesMessage}### - Décès :
 
 ${topMorts}
 
@@ -157,6 +194,8 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
 
     const millisecondes = tempsavantminuit();
 
+    console.log(`Message préparé, ${millisecondes}ms à attendre...`)
+
     setTimeout(async () => {
         const splitParts = splitText(message)
 
@@ -164,6 +203,7 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
             await channel.send(part);
             console.log(`Partie ${index + 1} envoyée :)`);
         }
+        console.log('Les messages sont envoyés')
         setTimeout(async () => {
             laDateDuJour()
         }, 60000)
