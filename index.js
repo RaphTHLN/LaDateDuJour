@@ -10,13 +10,12 @@ const { token } = process.env;
 const fs = require('fs');
 const { Client, Collection, Partials } = require('discord.js');
 const { SearchOnThisDay } = require('./retrieve_wikipedia');
-const {User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent} = Partials;
 const channelid = "907720804316368956";
 const roleid = "1307842734240956547";
 const birthdaynamefile = './anniversaires.json';
 const evenementsnamefile = './evenements_historiques.json';
 
-const client = new Client({ intents: '3276799', partials: [User, Message, GuildMember, ThreadMember, Channel, Reaction, GuildScheduledEvent ] });
+const client = new Client({ intents: 0 });
 
 const tempsavantminuit = () => {
     const now = new Date();
