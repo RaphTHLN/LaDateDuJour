@@ -210,21 +210,24 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
 }
 
 client.on('ready', async () => {
-    console.log(`${client.user.username} est prêt!`);
+    console.log(`${client.user.username} is ready!`);
 
-    client.user.setPresence({
-        activities: [
-            {
-                name: 'voir le futur 📅',
-                type: 'WATCHING',
-            },
-        ],
-        status: 'online',
-    });
+    try {
+        await client.user.setPresence({
+            activities: [
+                {
+                    name: 'Préparer le futur 📅',
+                    type: 'WATCHING',
+                },
+            ],
+            status: 'online',
+        });
+
+        console.log('Statut mis à jour avec succès');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+    }
 
     laDateDuJour();
 });
-
-
-
 client.login(token);
