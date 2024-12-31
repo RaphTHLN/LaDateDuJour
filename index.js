@@ -210,9 +210,15 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
 }
 
 client.on('ready', async () => {
-    console.log(`${client.user.username} is ready !`)
-    laDateDuJour()
-})
+    console.log(`${client.user.username} is ready !`);
 
+    // Ajout du statut personnalisé
+    client.user.setPresence({
+        activities: [{ name: 'ton avenir 📅', type: 'WATCHING' }]
+        status: 'online',
+    });
+
+    laDateDuJour();
+})
 
 client.login(token);
