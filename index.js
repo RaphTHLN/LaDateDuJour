@@ -216,7 +216,7 @@ client.on('ready', async () => {
         await client.user.setPresence({
             activities: [
                 {
-                    name: 'préparer le futur 📅',
+                    name: 'préparer le calendrier 📅',
                     type: ActivityType.Watching,
                 },
             ],
