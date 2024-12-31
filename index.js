@@ -8,7 +8,7 @@
 require('dotenv').config();
 const { token } = process.env;
 const fs = require('fs');
-const { Client } = require('discord.js');
+const { Client, ActivityType } = require('discord.js');
 const { SearchOnThisDay } = require('./retrieve_wikipedia');
 const channelid = "907720804316368956";
 const roleid = "1167616651265577003";
@@ -217,7 +217,7 @@ client.on('ready', async () => {
             activities: [
                 {
                     name: 'Préparer le futur 📅',
-                    type: 'WATCHING',
+                    type: ActivityType.Watching,
                 },
             ],
             status: 'online',
