@@ -217,7 +217,7 @@ client.on('ready', async () => {
             activities: [
                 {
                     name: 'préparer le calendrier 📅',
-                    type: ActivityType.Watching,
+                    type: ActivityType.Playing,
                 },
             ],
             status: 'online',
