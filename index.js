@@ -208,17 +208,22 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
         }, 60000)
     }, millisecondes)
 }
-
 client.on('ready', async () => {
-    console.log(`${client.user.username} is ready !`);
+    console.log(`${client.user.username} est prêt!`);
 
-    // Ajout du statut personnalisé
     client.user.setPresence({
-        activities: [{ name: 'ton avenir 📅', type: 'WATCHING' }]
+        activities: [
+            {
+                name: 'voir le futur 📅',
+                type: 'WATCHING',
+            },
+        ],
         status: 'online',
     });
 
     laDateDuJour();
-})
+});
+
+
 
 client.login(token);
