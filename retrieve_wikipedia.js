@@ -27,6 +27,23 @@ async function retryWithDelay(fn, retries, delay) {
         }
     }
 }
+const cleanData = (data) => {
+    const seenTexts = new Set();
+  
+    return data
+      .map(entry => {
+        const textParts = entry.text.split("\n");
+        const cleanedText = textParts.length > 1 ? textParts.slice(1).join("\n").trim() : entry.text;
+        return { ...entry, text: cleanedText };
+      })
+      .filter(entry => {
+        if (seenTexts.has(entry.text)) {
+          return false;
+        }
+        seenTexts.add(entry.text);
+        return true;
+      });
+  };
 
 function formatTitle(urlTitle) {
     const decodedTitle = decodeURIComponent(urlTitle);
@@ -117,11 +134,13 @@ async function SearchOnThisDay(){
 
         const holidays = events.holidays.slice(0, 4);
 
+        const cleanedHolidays = cleanData(holidays);
+
         return {
             elementshistoriques: events.selected,
             deaths,
             births,
-            holidays
+            holidays: cleanedHolidays
         }
     } catch (error) {
         console.error("Erreur globale :", error);

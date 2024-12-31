@@ -8,10 +8,10 @@
 require('dotenv').config();
 const { token } = process.env;
 const fs = require('fs');
-const { Client, Collection, Partials } = require('discord.js');
+const { Client } = require('discord.js');
 const { SearchOnThisDay } = require('./retrieve_wikipedia');
 const channelid = "907720804316368956";
-const roleid = "1307842734240956547";
+const roleid = "1167616651265577003";
 const birthdaynamefile = './anniversaires.json';
 const evenementsnamefile = './evenements_historiques.json';
 
@@ -135,11 +135,11 @@ async function laDateDuJour(){
         .join('\n\n');
 
     const topMorts = Top3(ladatedujour.deaths)
-        .map(mort => `**${mort.year}** : [${mort.name}](<${mort.url}>) ${mort.description} *( Popularité: ${mort.popularity} )*`)
+        .map(mort => `**${mort.year}** : [${mort.name}](<${mort.url}>) ${mort.description}`)
         .join('\n\n');
 
     const topNaissances = Top3(ladatedujour.births)
-        .map(naissance => `**${naissance.year}** : [${naissance.name}](<${naissance.url}>) ${naissance.description} *( Popularité: ${naissance.popularity} )*`)
+        .map(naissance => `**${naissance.year}** : [${naissance.name}](<${naissance.url}>) ${naissance.description}`)
         .join('\n\n');
 
     const topFetes = ladatedujour.holidays
@@ -208,6 +208,7 @@ Popularité : [Google Trends](<https://trends.google.fr/trends/>)
         }, 60000)
     }, millisecondes)
 }
+
 client.on('ready', async () => {
     console.log(`${client.user.username} est prêt!`);
 
