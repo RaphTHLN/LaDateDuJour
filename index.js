@@ -165,7 +165,7 @@ async function laDateDuJour(){
     const message = `||<@&${roleid}>||
 # Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>\n
 ## Bon anniversaire à ceux qui sont nés un ${formattedDate2} ! :tada:\n
-
+(first lol)\n
 
 ### - Événements historiques :
 
