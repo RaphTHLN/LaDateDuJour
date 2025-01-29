@@ -8,7 +8,7 @@
 require('dotenv').config();
 const { token } = process.env;
 const fs = require('fs');
-const { Client, ActivityType } = require('discord.js');
+const { Client, ActivityType, AttachmentBuilder } = require('discord.js');
 const { SearchOnThisDay } = require('./retrieve_wikipedia');
 const channelid = "907720804316368956";
 const roleid = "1167616651265577003";
@@ -193,9 +193,6 @@ ${topMorts}
 
 ${topFetes}  
 
-### - Météo du jour :  
-![Carte météo](<${weatherImageURL}>)  
-
 ### - Sources :  
 
 Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)  
@@ -208,11 +205,17 @@ Météo : [Météo Express](<https://meteo-express.com/>)
 
     console.log(`Message préparé, ${millisecondes}ms à attendre...`)
 
+    const attachment = new AttachmentBuilder(weatherImageURL);
+
     setTimeout(async () => {
         const splitParts = splitText(message)
 
         for (const [index, part] of splitParts.entries()) {
-            await channel.send(part);
+            if (index === splitParts.length - 1) {
+                await channel.send({content: part, files: [attachment]})
+            }else{
+                await channel.send(part);
+            }
             console.log(`Partie ${index + 1} envoyée :)`);
         }
         console.log('Les messages sont envoyés')
