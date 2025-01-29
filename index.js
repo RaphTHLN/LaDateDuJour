@@ -20,13 +20,21 @@ const client = new Client({ intents: 0 });
 const tempsavantminuit = () => {
     const now = new Date();
     const minuit = new Date();
-
     minuit.setHours(24, 0, 0, 0);
-
-    const tempsavantminuit = minuit - now;
-
-    return tempsavantminuit;
+    return minuit - now;
 };
+// Raph : J'ai ajouté sa, j'ai tréés peur de casser le code ;(
+const getWeatherImageURL = () => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1); 
+
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Format MM
+    const day = String(today.getDate()).padStart(2, '0'); // Format DD
+
+    return `https://meteo-express.com/wp-content/uploads/${year}/${month}/${month}-${day}matin.png`;
+};
+
 function Top3(data) {
     return data
         .sort((a, b) => b.popularite - a.popularite)
@@ -162,34 +170,39 @@ async function laDateDuJour(){
         evenementsMessage += '\n'
     }
 
+    const weatherImageURL = getWeatherImageURL();
+
     const message = `||<@&${roleid}>||
-# Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>\n
-## Bon anniversaire à ceux qui sont nés un ${formattedDate2} ! :tada:\n
-(first lol)\n
+# Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>  
 
-### - Événements historiques :
+## Bon anniversaire à ceux qui sont nés un ${formattedDate2} ! :tada:  
 
-${topEvenements}
+### - Événements historiques :  
 
-${evenementsMessage}### - Anniversaires :
+${topEvenements}  
 
-${topNaissances}
+${evenementsMessage}### - Anniversaires :  
 
-${anniversairesMessage}### - Décès :
+${topNaissances}  
 
-${topMorts}
+${anniversairesMessage}### - Décès :  
 
-### - Fêtes et Journées Internationales :
+${topMorts}  
 
-${topFetes}
+### - Fêtes et Journées Internationales :  
 
-### - Sources :
+${topFetes}  
 
-Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)
-Popularité : [Google Trends](<https://trends.google.fr/trends/>)
+### - Météo du jour :  
+![Carte météo](<${weatherImageURL}>)  
 
+### - Sources :  
 
-**Envoyé par : <@${client.user.id}>**`
+Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)  
+Popularité : [Google Trends](<https://trends.google.fr/trends/>)  
+Météo : [Météo Express](<https://meteo-express.com/>)  
+
+**Envoyé par : <@${client.user.id}>**`;
 
     const millisecondes = tempsavantminuit();
 
