@@ -102,10 +102,21 @@
         "annee": 2008
     },
     {
+        "jour": 11,
+        "mois": 7,
+        "identifiant": "1006205263268814918",
+    },
+    {
         "jour": 17,
-        "mois": 8,
+        "mois": 7,
         "identifiant": "484241922647654400",
         "annee": 2004
+    },
+    { 
+        "jour": 3,
+        "mois": 8,
+        "identifiant": "1036360353384255518",
+        "annee": 2007
     },
     {
         "jour": 13,
