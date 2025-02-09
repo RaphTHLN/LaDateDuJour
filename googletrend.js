@@ -8,11 +8,24 @@
 
 const googleTrends = require('google-trends-api-code');
 
+const exclure = [
+    "Pianiste",
+    "Chanteur",
+    "Distillation",
+    "Position",
+    "Musicien",
+    "Baseball",
+    "Manager",
+    "Hockey sur glace"
+]
+
 async function getTrending(keyword) {
     try {
         if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
             throw 'Keyword field is missing';
         }
+
+        if(exclure.includes(keyword)) return 0;
     
         const today = new Date();
     
