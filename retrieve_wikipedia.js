@@ -13,7 +13,7 @@ async function retryWithDelay(fn, retries, delay) {
         try {
             return await fn();
         } catch (error) {
-            if(error.message === "Keyword field is missing"){
+            if (error.message === "Keyword field is missing") {
                 return 0;
             }
             console.error(`Tentative ${attempt} échouée :`, error.message);
@@ -27,7 +27,7 @@ async function retryWithDelay(fn, retries, delay) {
         }
     }
 }
-const cleanData = (data) => {
+function cleanData(data) {
     const seenTexts = new Set();
   
     return data
@@ -54,17 +54,13 @@ function formatTitle(urlTitle) {
 }
 
 function justName(input) {
-    const commaIndex = input.indexOf(',');
-    const parenthesisIndex = input.indexOf('(');
-
-    const firstIndex = [commaIndex, parenthesisIndex]
+    const indexes = [input.indexOf(','), input.indexOf('(')]
         .filter(index => index !== -1)
-        .sort((a, b) => a - b)[0];
-
-    return firstIndex !== undefined ? input.slice(0, firstIndex).trim() : input.trim();
+    const firstIndex = Math.min(...indexes)
+    return firstIndex !== Infinity ? input.slice(0, firstIndex).trim() : input.trim();
 }
 
-async function SearchOnThisDay(){
+async function searchOnThisDay() {
     try {
         await wiki.setLang("fr");
 
@@ -81,7 +77,7 @@ async function SearchOnThisDay(){
         let deaths = [];
 
         for (const element of events.deaths) {
-            try{
+            try {
                 const url = element.pages[0].content_urls.desktop.page;
                 const pageTitle = formatTitle(url.split('/').pop());
                 const page = await wiki.page(pageTitle);
@@ -98,7 +94,7 @@ async function SearchOnThisDay(){
                     description: summary.description ? `est un(e) ${summary.description}` : 'N\'a pas de description',
                     popularity: trending !== null ? trending : 0,
                 });
-            }catch(err){
+            } catch(err) {
                 console.log(err)
             }
         }
@@ -147,4 +143,5 @@ async function SearchOnThisDay(){
     }
 }
 
-module.exports = { SearchOnThisDay }
+
+module.exports = { searchOnThisDay }

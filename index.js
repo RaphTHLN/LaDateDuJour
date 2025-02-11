@@ -6,25 +6,26 @@
 /* ********************************************* */
 
 require('dotenv').config();
-const { token } = process.env;
 const fs = require('fs');
+const { token } = process.env;
+const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder } = require('discord.js');
-const { SearchOnThisDay } = require('./retrieve_wikipedia');
-const channelid = "907720804316368956";
-const roleid = "1167616651265577003";
+const { searchOnThisDay } = require('./retrieve_wikipedia');
+const channelId = config.channelId ?? "907720804316368956";
+const roleId = config.roleId ?? "1167616651265577003";
 const birthdaynamefile = './anniversaires.json';
 const evenementsnamefile = './evenements_historiques.json';
 
 const client = new Client({ intents: 0 });
 
-const tempsavantminuit = () => {
+function getTimeToMidnight() {
     const now = new Date();
-    const minuit = new Date();
-    minuit.setHours(24, 0, 0, 0);
-    return minuit - now;
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    return midnight - now;
 };
 // Raph : J'ai ajouté sa, j'ai tréés peur de casser le code ;(
-const getWeatherImageURL = () => {
+function getWeatherImageURL() {
     const today = new Date();
     today.setDate(today.getDate() + 1); 
 
@@ -35,14 +36,14 @@ const getWeatherImageURL = () => {
     return `https://meteo-express.com/wp-content/uploads/${year}/${month}/${month}-${day}matin.png`;
 };
 
-function Top3(data) {
+function getTop3(data) {
     return data
         .sort((a, b) => b.popularite - a.popularite)
         .slice(0, 3)
         .sort((a, b) => a.annee - b.annee);
 }
 
-const checkBirthdays = async () => {
+async function checkBirthdays() {
 
     const birthdayfile = JSON.parse(fs.readFileSync(birthdaynamefile, 'utf8'));
     const today = new Date();
@@ -73,7 +74,7 @@ const checkBirthdays = async () => {
     }
 }; 
 
-const checkEvenements = async () => {
+async function checkEvenements() {
 
     const evenementsfile = JSON.parse(fs.readFileSync(evenementsnamefile, 'utf8'));
     const today = new Date();
@@ -121,17 +122,32 @@ function splitText(text, maxLength = 2000) {
     return parts;
 }
 
-async function laDateDuJour(){
+async function sendMessage(message, attachment, channel) {
+    const splitParts = splitText(message)
+
+    for (const [index, part] of splitParts.entries()) {
+        if (index === splitParts.length - 1) {
+            await channel.send({content: part, files: [attachment]})
+        }else{
+            await channel.send(part);
+        }
+        console.log(`Partie ${index + 1} envoyée :)`);
+    }
+    console.log('Les messages sont envoyés')
+    setTimeout(async () => {
+        laDateDuJour()
+    }, 60000)
+}
+
+async function laDateDuJour() {
     console.log("Démarrage de la création du message pour demain.")
     const date = new Date();
     date.setDate(date.getDate() + 1);
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    const formattedDate = new Intl.DateTimeFormat('fr-FR', options).format(date);
     const options2 = { day: 'numeric', month: 'long' };
-    const formattedDate2 = new Intl.DateTimeFormat('fr-FR', options2).format(date);
 
-    const channel = await client.channels.fetch(channelid);
-    const ladatedujour = await SearchOnThisDay();
+    const channel = await client.channels.fetch(channelId);
+    const ladatedujour = await searchOnThisDay();
     const anniversaires = await checkBirthdays();
     const evenements = await checkEvenements();
 
@@ -142,11 +158,11 @@ async function laDateDuJour(){
         .map(evenements => `**${evenements.year}** : ${evenements.text}`)
         .join('\n\n');
 
-    const topMorts = Top3(ladatedujour.deaths)
+    const topMorts = getTop3(ladatedujour.deaths)
         .map(mort => `**${mort.year}** : [${mort.name}](<${mort.url}>) ${mort.description}`)
         .join('\n\n');
 
-    const topNaissances = Top3(ladatedujour.births)
+    const topNaissances = getTop3(ladatedujour.births)
         .map(naissance => `**${naissance.year}** : [${naissance.name}](<${naissance.url}>) ${naissance.description}`)
         .join('\n\n');
 
@@ -155,7 +171,7 @@ async function laDateDuJour(){
         .join('\n\n');
     
     let anniversairesMessage = '';
-    if(anniversaires !== null){
+    if (anniversaires !== null) {
         for (const element of anniversaires) {
             anniversairesMessage += `**${element.age ? element.age : '????'}** : C'est l'anniversaire de <@${element.identifiant}>\n`;
         }
@@ -163,7 +179,7 @@ async function laDateDuJour(){
     }
 
     let evenementsMessage = '';
-    if(evenements !== null){
+    if (evenements !== null) {
         for (const element of evenements) {
             evenementsMessage += `**${element.annee}** : ${element.text}\n`;
         }
@@ -172,10 +188,10 @@ async function laDateDuJour(){
 
     const weatherImageURL = getWeatherImageURL();
 
-    const message = `||<@&${roleid}>||
-# Nous sommes le ${formattedDate} ! <a:cat:1310685205547323432>  
-
-## Bon anniversaire à ceux qui sont nés un ${formattedDate2} ! :tada:  
+    const message = `||<@&${roleId}>||
+# Nous sommes le ${date.toLocaleDateString("fr-FR", options)} ! <a:cat:1310685205547323432>\n
+## Bon anniversaire à ceux qui sont nés un ${date.toLocaleDateString("fr-FR", options2)} ! :tada:\n
+(first lol)\n
 
 ### - Événements historiques :  
 
@@ -199,37 +215,29 @@ Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)
 Popularité : [Google Trends](<https://trends.google.fr/trends/>)  
 Météo : [Météo Express](<https://meteo-express.com/>)  
 
-**Envoyé par : <@${client.user.id}>**`;
 
-    const millisecondes = tempsavantminuit();
+**Envoyé par : <@${client.user.id}>**`
 
-    console.log(`Message préparé, ${millisecondes}ms à attendre...`)
+    const milliseconds = getTimeToMidnight();
+
+    console.log(`Message préparé, ${milliseconds}ms à attendre...`)
 
     const attachment = new AttachmentBuilder(weatherImageURL);
 
-    setTimeout(async () => {
-        const splitParts = splitText(message)
-
-        for (const [index, part] of splitParts.entries()) {
-            if (index === splitParts.length - 1) {
-                await channel.send({content: part, files: [attachment]})
-            }else{
-                await channel.send(part);
-            }
-            console.log(`Partie ${index + 1} envoyée :)`);
-        }
-        console.log('Les messages sont envoyés')
+    if (process.env.ISDEV === "1") {
+        sendMessage(message, attachment, channel)
+    } else {
         setTimeout(async () => {
-            laDateDuJour()
-        }, 60000)
-    }, millisecondes)
+            sendMessage(message, attachment, channel)
+        }, milliseconds)
+    }
 }
 
 client.on('ready', async () => {
     console.log(`${client.user.username} is ready!`);
 
     try {
-        await client.user.setPresence({
+        client.user.setPresence({
             activities: [
                 {
                     name: 'préparer le calendrier 📅',
@@ -243,7 +251,6 @@ client.on('ready', async () => {
     } catch (error) {
         console.error('Erreur lors de la mise à jour du statut:', error);
     }
-
     laDateDuJour();
 });
 client.login(token);

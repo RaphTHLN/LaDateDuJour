@@ -20,6 +20,7 @@ const exclure = [
 ];
 
 async function getTrending(keyword) {
+    if (process.env.ISDEV === "1") return 1
     try {
         if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
             throw 'Keyword field is missing';
