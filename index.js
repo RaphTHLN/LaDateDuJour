@@ -24,14 +24,13 @@ function getTimeToMidnight() {
     midnight.setHours(24, 0, 0, 0);
     return midnight - now;
 };
-// Raph : J'ai ajouté sa, j'ai tréés peur de casser le code ;(
 function getWeatherImageURL() {
     const today = new Date();
     today.setDate(today.getDate() + 1); 
 
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Format MM
-    const day = String(today.getDate()).padStart(2, '0'); // Format DD
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
 
     return `https://meteo-express.com/wp-content/uploads/${year}/${month}/${month}-${day}matin.png`;
 };
