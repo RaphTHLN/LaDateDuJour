@@ -7,7 +7,7 @@
 
 require('dotenv').config();
 const fs = require('fs');
-const { token } = process.env;
+const token = process.env.TOKEN;
 const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder } = require('discord.js');
 const { searchOnThisDay } = require('./retrieve_wikipedia');
