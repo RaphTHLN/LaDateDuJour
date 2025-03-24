@@ -84,6 +84,11 @@
         "identifiant": "826133033069051954"
     },
     {
+        "jour": 4,
+        "mois": 6,
+        "identifiant": "1073278298500640859"
+    },
+    {
         "jour": 26,
         "mois": 6,
         "identifiant": "361503481904889856",
@@ -119,10 +124,27 @@
         "annee": 2007
     },
     {
+        "jour": 10,
+        "mois": 9,
+        "identifiant": "1187634952460828782",
+    },
+    {
         "jour": 13,
         "mois": 9,
         "identifiant": "557944868123574272",
         "annee": 2005
+    },
+    {
+        "jour": 14,
+        "mois": 10,
+        "identifiant": "439888146809749515",
+        "annee": 2004
+    },
+    {
+        "jour": 23,
+        "mois": 10,
+        "identifiant": "839610477873332234",
+        "annee": 2007
     },
     {
         "jour": 13,
