@@ -117,6 +117,18 @@
         "identifiant": "484241922647654400",
         "annee": 2004
     },
+    {
+        "jour": 19,
+        "mois": 7,
+        "identifiant": "1218000687078838354",
+        "annee": 2006
+    },
+    {
+        "jour": 31,
+        "mois": 7,
+        "identifiant": "273783885874200576",
+        "annee": 2003
+    },
     { 
         "jour": 3,
         "mois": 8,
@@ -132,6 +144,12 @@
         "jour": 13,
         "mois": 9,
         "identifiant": "557944868123574272",
+        "annee": 2005
+    },
+    {
+        "jour": 6,
+        "mois": 10,
+        "identifiant": "518464120455036929",
         "annee": 2005
     },
     {
