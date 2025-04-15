@@ -7,6 +7,7 @@
 
 require('dotenv').config();
 const fs = require('fs');
+const path = require('path');
 const { token } = process.env;
 const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder } = require('discord.js');
@@ -15,6 +16,9 @@ const channelId = config.channelId ?? "907720804316368956";
 const roleId = config.roleId ?? "1167616651265577003";
 const birthdaynamefile = './anniversaires.json';
 const evenementsnamefile = './evenements_historiques.json';
+const acnhDB = JSON.parse(
+               fs.readFileSync(path.join(__dirname, 'acnh_database.json'), 'utf-8')
+             );
 
 const client = new Client({ intents: 0 });
 
@@ -41,7 +45,24 @@ function getTop3(data) {
         .slice(0, 3)
         .sort((a, b) => a.annee - b.annee);
 }
+function getVillagerBirthday(AcnhDB, date = new Date()) {
 
+  const mois = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const day = String(today.getDate()).padStart(2, '0');
+  const monthName = mois[date.getMois()];
+  
+  const villagers = AcnhDB[monthName]?.[day];
+  if (villagers) {
+  return villagers.includes(" et ")
+    ? villagers.split (" et ").map(name => name.trim ())
+    : [villagers];
+    } else {
+    return[];
+    }
+}
 async function checkBirthdays() {
 
     const birthdayfile = JSON.parse(fs.readFileSync(birthdaynamefile, 'utf8'));
@@ -169,6 +190,10 @@ async function laDateDuJour() {
         .map(fete => `${fete.text}`)
         .join('\n\n');
     
+    const acMessage = getVillagerBirthday > 0
+        ? `\n### - 🎉 Sur **Animal Crossing** c'est l'anniversaire de \n\n${acBirthdays.map(n => `- ${n}`).join('\n')}\n`
+        : '';
+    
     let anniversairesMessage = '';
     if (anniversaires !== null) {
         for (const element of anniversaires) {
@@ -200,7 +225,7 @@ ${evenementsMessage}### - Anniversaires :
 
 ${topNaissances}  
 
-${anniversairesMessage}### - Décès :  
+${anniversairesMessage}${acMessage}### - Décès :  
 
 ${topMorts}  
 
