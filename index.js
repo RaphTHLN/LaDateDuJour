@@ -52,7 +52,7 @@ function getVillagerBirthday(AcnhDB, date = new Date()) {
     "July", "August", "September", "October", "November", "December"
   ];
   const day = String(today.getDate()).padStart(2, '0');
-  const monthName = mois[date.getMois()];
+  const monthName = mois[date.getMonth()];
   
   const villagers = AcnhDB[monthName]?.[day];
   if (villagers) {
@@ -190,8 +190,10 @@ async function laDateDuJour() {
         .map(fete => `${fete.text}`)
         .join('\n\n');
     
-    const acMessage = getVillagerBirthday > 0
-        ? `\n### - 🎉 Sur **Animal Crossing** c'est l'anniversaire de \n\n${acBirthdays.map(n => `- ${n}`).join('\n')}\n`
+
+    const acBirthdays = getVillagerBirthday(acnhDB, date);
+    const acMessage = acBirthdays.length > 0
+        ? `\n🎉 Sur **Animal Crossing** c'est l'anniversaire de \n\n${acBirthdays.map(n => `- ${n}`).join('\n')}\n`
         : '';
     
     let anniversairesMessage = '';
@@ -215,7 +217,6 @@ async function laDateDuJour() {
     const message = `||<@&${roleId}>||
 # Nous sommes le ${date.toLocaleDateString("fr-FR", options)} ! <a:cat:1310685205547323432>\n
 ## Bon anniversaire à ceux qui sont nés un ${date.toLocaleDateString("fr-FR", options2)} ! :tada:\n
-(first lol)\n
 
 ### - Événements historiques :  
 
@@ -237,7 +238,8 @@ ${topFetes}
 
 Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)  
 Popularité : [Google Trends](<https://trends.google.fr/trends/>)  
-Météo : [Météo Express](<https://meteo-express.com/>)  
+Météo : [Météo Express](<https://meteo-express.com/>)
+Anniversaires Animal Crossing : [Animal Crossing Wiki](<https://animalcrossing.fandom.com/wiki/Animal_Crossing_Wiki/>)
 
 
 **Envoyé par : <@${client.user.id}>**`
