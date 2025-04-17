@@ -51,6 +51,7 @@ function getVillagerBirthday(AcnhDB, date = new Date()) {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
+  const today = date;
   const day = String(today.getDate()).padStart(2, '0');
   const monthName = mois[date.getMonth()];
   
