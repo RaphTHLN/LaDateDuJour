@@ -194,8 +194,8 @@ async function laDateDuJour() {
 
     const acBirthdays = getVillagerBirthday(acnhDB, date);
     const acMessage = acBirthdays.length > 0
-        ? `\n🎉 Sur **Animal Crossing** c'est l'anniversaire de \n\n${acBirthdays.map(n => `- ${n}`).join('\n')}\n`
-        : '';
+        ? `🎉 Sur **Animal Crossing** c'est l'anniversaire de ${acBirthdays.map(n => `- ${n}`).join(', ')}`
+        : "";
     
     let anniversairesMessage = '';
     if (anniversaires !== null) {
@@ -227,8 +227,8 @@ ${evenementsMessage}### - Anniversaires :
 
 ${topNaissances}  
 
-${anniversairesMessage}${acMessage}### - Décès :  
-
+${anniversairesMessage}${acMessage}
+### - Décès :  
 ${topMorts}  
 
 ### - Fêtes et Journées Internationales :  
