@@ -1,6 +1,4 @@
-<p align="center">
-  ![Banner](https://raw.githubusercontent.com/RaphTHLN/LaDateDuJour/refs/heads/main/lddj.png)
-</p>
+![Banner](https://raw.githubusercontent.com/RaphTHLN/LaDateDuJour/refs/heads/main/lddj.png)
 
 # LaDateDuJour : Ton bot Discord qui te rend plus intelligent chaque matin (ou pas) !
 
