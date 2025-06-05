@@ -20,6 +20,7 @@ L'idée ? Elle est tombée du ciel... ou plutôt, elle a germé dans les cerveau
 * **⚰️ Décès marquants** : Un moment de recueillement, mais toujours avec une touche de culture générale.
 * **🥳 Fêtes et journées internationales** : Parce que oui, la journée du chat existe, et le bot te le rappellera !
 * **🐶 Anniversaires des habitants Animal Crossing** : Pour ne jamais rater l'anniv' de Didi, Rosie ou Raymond et leur souhaiter un joyeux non-anniversaire ! (Parce que oui, ils le méritent).
+* **☀️ Météo sur petite carte** : Parce que savoir s'il va pleuvoir avant de sortir son parapluie, c'est quand même plus pratique. Une mini-carte météo pour la dose d'infos complète !
 
 ---
 
