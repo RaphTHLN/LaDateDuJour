@@ -19,6 +19,7 @@ L'idée ? Elle est tombée du ciel... ou plutôt, elle a germé dans les cerveau
 * **🎂 Anniversaires de personnalités** : Pour savoir quel rappeur est né le même jour que toi, ou juste pour te sentir moins seul.
 * **⚰️ Décès marquants** : Un moment de recueillement, mais toujours avec une touche de culture générale.
 * **🥳 Fêtes et journées internationales** : Parce que oui, la journée du chat existe, et le bot te le rappellera !
+* **🐶 Anniversaires des habitants Animal Crossing** : Pour ne jamais rater l'anniv' de Didi, Rosie ou Raymond et leur souhaiter un joyeux non-anniversaire ! (Parce que oui, ils le méritent).
 
 ---
 
