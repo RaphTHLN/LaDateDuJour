@@ -118,3 +118,10 @@ dist
 .pnp.*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
+
+# Start of LaDateDuJour files
+
+config.json
+jsconfig.json
+# End of LaDateDuJour files
+

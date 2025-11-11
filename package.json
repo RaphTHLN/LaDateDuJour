@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/RaphTHLN/LaDateDuJour#readme",
   "dependencies": {
+    "better-sqlite3": "^11.8.1",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "google-trends-api-code": "^4.9.10",
