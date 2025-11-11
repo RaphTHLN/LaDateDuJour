@@ -1,8 +1,10 @@
-const fs = require("fs")
+const fs = require("fs");
+const path = require("path");
 const options = { day: 'numeric', month: 'long', year: 'numeric' };
 const options2 = { day: 'numeric', month: 'long' };
-const config = fs.existsSync("../config.json") ? require("./config.json") : {}
-const roleId = config.roleId ?? "1167616651265577003";
+const configPath = path.join(__dirname, '..', 'config.json');
+const config = fs.existsSync(configPath) ? require(configPath) : {}
+const { roleId } = process.env;
 
 module.exports.getSection = async (date, ladatedujour) => {
     const header = `||<@&${roleId}>||

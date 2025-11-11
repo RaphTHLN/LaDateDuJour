@@ -1,13 +1,13 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require("path")
-const { token } = process.env;
 const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder, IntentsBitField } = require('discord.js');
 const { searchOnThisDay } = require('./retrieve_wikipedia');
-const channelId = config.channelId ?? "907720804316368956";
-const commandManager = require("./command_manager")
+const commandManager = require("./command_manager");
 
+const token = process.env.DISCORD_TOKEN || '';
+const channelId = process.env.channelId || process.env.CHANNEL_ID || config.channelId;
 const client = new Client({ intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent] });
 
 
@@ -108,7 +108,6 @@ async function laDateDuJour() {
 ### - Sources :  
 
 Tout : [Wikipédia](<https://fr.wikipedia.org/wiki/>)  
-Popularité : [Google Trends](<https://trends.google.fr/trends/>)  
 Météo : [Météo Express](<https://meteo-express.com/>)
 Anniversaires Animal Crossing : [Animal Crossing Wiki](<https://animalcrossing.fandom.com/wiki/Animal_Crossing_Wiki/>)
 
@@ -152,4 +151,8 @@ client.on('ready', async () => {
     commandManager.init(client)
     laDateDuJour();
 });
-client.login(token);
+console.log('Token chargé (masqué) :', `${token.slice(0,6)}...${token.slice(-6)}`);
+client.login(token).catch(err => {
+    console.error('Échec de connexion à Discord :', err.code || err.message || err);
+    process.exit(1);
+});
