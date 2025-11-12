@@ -3,15 +3,10 @@ const fs = require('fs');
 const path = require("path")
 const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder, IntentsBitField } = require('discord.js');
-const { searchOnThisDay } = require('./retrieve_wikipedia');
 const commandManager = require("./command_manager");
-
 const token = process.env.DISCORD_TOKEN || '';
 const channelId = process.env.channelId || process.env.CHANNEL_ID || config.channelId;
 const client = new Client({ intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent] });
-
-
-// Charger les modules de manière ordonnée
 const modulesDir = path.join(__dirname, 'modules');
 const moduleFiles = fs.readdirSync(modulesDir)
     .filter(file => file.endsWith('.js'))
@@ -121,7 +116,7 @@ Anniversaires Animal Crossing : [Animal Crossing Wiki](<https://animalcrossing.f
 
     const attachment = new AttachmentBuilder(weatherImageURL);
 
-    if (process.env.ISDEV === "1") {
+    if (process.env.DEBUG_MODE === "1") {
         sendMessage(message, attachment, channel)
     } else {
         setTimeout(async () => {
@@ -151,7 +146,6 @@ client.on('ready', async () => {
     commandManager.init(client)
     laDateDuJour();
 });
-console.log('Token chargé (masqué) :', `${token.slice(0,6)}...${token.slice(-6)}`);
 client.login(token).catch(err => {
     console.error('Échec de connexion à Discord :', err.code || err.message || err);
     process.exit(1);
