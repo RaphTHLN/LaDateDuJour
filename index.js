@@ -86,7 +86,7 @@ async function laDateDuJour() {
         try {
             const module = require(path.join(modulesDir, file));
             if (module.getSection) {
-                const section = await module.getSection(date, wikidata);
+                const section = await module.getSection(date);
                 console.log(file, section)
                 if (section) {
                     messageParts.push(section);
