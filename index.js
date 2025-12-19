@@ -78,7 +78,6 @@ async function laDateDuJour() {
     date.setDate(date.getDate() + 1);
 
     const channel = await client.channels.fetch(channelId);
-    const wikidata = await searchOnThisDay();
    
 
     const weatherImageURL = getWeatherImageURL();
