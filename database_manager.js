@@ -7,10 +7,6 @@ if (!fs.existsSync(dir)){
 
 const db = require('better-sqlite3')('data/database.db', { verbose: console.log });
 
-/**
- * Initialise la base de données.
- * Crée la table 'anniversaires' si elle n'existe pas.
- */
 function init() {
     try {
         db.pragma('journal_mode = WAL');
@@ -41,12 +37,6 @@ function init() {
     }
 }
 
-/**
- * Récupère les anniversaires pour un jour et un mois donnés.
- * @param {number} jour Le jour à rechercher.
- * @param {number} mois Le mois à rechercher.
- * @returns {Array<{ user_id: string, annee: number, jour: number, mois: number }>} Un tableau des utilisateurs dont c'est l'anniversaire.
- */
 function getBirthday(jour, mois) {
     try {
         const stmt = db.prepare(
@@ -77,37 +67,16 @@ function addOrUpdateBirthday(userId, jour, mois, annee) {
     stmt.run(userId, jour, mois, annee);
 }
 
-/**
- * Récupère l'anniversaire d'un utilisateur spécifique.
- * @param {string} userId
- * @returns {object | null} L'anniversaire trouvé ou null.
- */
 function getBirthdayForUser(userId) {
     const stmt = db.prepare('SELECT jour, mois, annee FROM anniversaires WHERE user_id = ?');
     return stmt.get(userId); // .get() retourne la première ligne trouvée
 }
 
-/**
- * Supprime l'anniversaire d'un utilisateur.
- * @param {string} userId
- * @returns {object} Le résultat de l'opération de la base de données.
- */
 function deleteBirthday(userId) {
     const stmt = db.prepare('DELETE FROM anniversaires WHERE user_id = ?');
     return stmt.run(userId);
 }
 
-/**
-
- * Récupère les événements du serveur pour un jour et un mois donnés.
-
- * @param {number} jour
-
- * @param {number} mois
-
- * @returns {Array<{ id: number, jour: number, mois: number, annee: number, description: string }>} Un tableau des événements de serveur.
-
- */
 function getServerEvents(jour, mois) {
     try {
         const stmt = db.prepare(
@@ -125,13 +94,6 @@ function getServerEvents(jour, mois) {
     }
 }
 
-/**
- * Ajoute un événement historique.
- * @param {number} jour
- * @param {number} mois
- * @param {number} annee
- * @param {string} description
- */
 function addServerEvent(jour, mois, annee, description) {
     const stmt = db.prepare(`
         INSERT INTO server_events (jour, mois, annee, description)
@@ -145,7 +107,6 @@ function deleteServerEvent(id) {
     return stmt.run(id);
 }
 
-// Initialisation automatique lors du chargement du module
 init();
 
 module.exports = {

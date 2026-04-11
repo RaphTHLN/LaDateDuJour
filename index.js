@@ -4,6 +4,7 @@ const path = require("path")
 const config = fs.existsSync("./config.json") ? require("./config.json") : {}
 const { Client, ActivityType, AttachmentBuilder, IntentsBitField } = require('discord.js');
 const commandManager = require("./command_manager");
+const configManager = require("./config_manager");
 const token = process.env.DISCORD_TOKEN || '';
 const channelId = process.env.channelId || process.env.CHANNEL_ID || config.channelId;
 const client = new Client({ intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent] });
@@ -65,29 +66,20 @@ async function sendMessage(message, attachment, channel) {
         console.log(`Partie ${index + 1} envoyée :)`);
     }
     console.log('Les messages sont envoyés')
-    setTimeout(async () => {
-        laDateDuJour()
-    }, 60000)
 }
 
-
-
-async function laDateDuJour() {
-    console.log("Démarrage de la création du message pour demain.")
+async function generateDailyMessage() {
+    console.log("Génération du message pour demain...")
     const date = new Date();
     date.setDate(date.getDate() + 1);
 
-    const channel = await client.channels.fetch(channelId);
-   
-
-    const weatherImageURL = getWeatherImageURL();
     const messageParts = []
     for (const file of moduleFiles) {
         try {
             const module = require(path.join(modulesDir, file));
             if (module.getSection) {
                 const section = await module.getSection(date);
-                console.log(file, section)
+                console.log(file, section ? "✓" : "✗")
                 if (section) {
                     messageParts.push(section);
                 }
@@ -108,20 +100,59 @@ Anniversaires Animal Crossing : [Animal Crossing Wiki](<https://animalcrossing.f
 
 **Envoyé par : <@${client.user.id}>**`
     messageParts.push(footer)
-    const message = messageParts.join("\n\n")
-    const milliseconds = getTimeToMidnight();
+    return messageParts.join("\n\n");
+}
 
-    console.log(`Message préparé, ${milliseconds}ms à attendre...`)
+async function laDateDuJour() {
+    console.log("=== ENVOI DES MESSAGES QUOTIDIENS ===")
 
+    // Générer le message une seule fois
+    const message = await generateDailyMessage();
+    const weatherImageURL = getWeatherImageURL();
     const attachment = new AttachmentBuilder(weatherImageURL);
 
-    if (process.env.DEBUG_MODE === "1") {
-        sendMessage(message, attachment, channel)
-    } else {
-        setTimeout(async () => {
-            sendMessage(message, attachment, channel)
-        }, milliseconds)
+    // Récupérer tous les serveurs configurés
+    let servers = configManager.getAllActiveServers();
+
+    // Fallback sur la config .env pour la rétro-compatibilité
+    if (servers.length === 0 && channelId) {
+        console.log("Aucun serveur en base de données, utilisation de la config .env");
+        servers = [{
+            guild_id: 'default',
+            channel_id: channelId,
+            role_id: process.env.ROLE_ID || null,
+            timezone: 'Europe/Paris'
+        }];
     }
+
+    if (servers.length === 0) {
+        console.warn("Aucun canal configuré pour recevoir les messages!");
+        return;
+    }
+
+    // Envoyer à chaque serveur
+    for (const server of servers) {
+        try {
+            const channel = await client.channels.fetch(server.channel_id);
+            if (!channel) {
+                console.warn(`Canal ${server.channel_id} introuvable pour le serveur ${server.guild_id}`);
+                continue;
+            }
+
+            console.log(`Envoi du message au canal ${server.channel_id}...`);
+            await sendMessage(message, attachment, channel);
+
+        } catch (error) {
+            console.error(`Erreur lors de l'envoi au serveur ${server.guild_id}:`, error);
+        }
+    }
+
+    console.log("=== FIN DE L'ENVOI ===")
+
+    // Relancer le cycle dans 1 minute
+    setTimeout(async () => {
+        laDateDuJour()
+    }, 60000)
 }
 
 client.on('ready', async () => {
@@ -142,9 +173,22 @@ client.on('ready', async () => {
     } catch (error) {
         console.error('Erreur lors de la mise à jour du statut:', error);
     }
+
     commandManager.init(client)
-    laDateDuJour();
+
+    // Premier appel pour le jour courant
+    if (process.env.DEBUG_MODE === "1") {
+        laDateDuJour();
+    } else {
+        // Attendre minuit pour le premier appel
+        const milliseconds = getTimeToMidnight();
+        console.log(`Prochain appel dans ${(milliseconds / 1000 / 60 / 60).toFixed(2)} heures`);
+        setTimeout(() => {
+            laDateDuJour();
+        }, milliseconds);
+    }
 });
+
 client.login(token).catch(err => {
     console.error('Échec de connexion à Discord :', err.code || err.message || err);
     process.exit(1);

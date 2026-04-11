@@ -2,21 +2,10 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-/**
- * Fonction helper pour attendre un certain temps
- */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Appelle l'API Gemini avec un prompt et retourne la réponse JSON parsée
- * Inclut un système de retry avec backoff exponentiel pour gérer les erreurs 503
- * @param {string} prompt - Le prompt à envoyer à Gemini
- * @param {Date} date - La date pour laquelle récupérer les informations
- * @param {number} maxRetries - Nombre maximum de tentatives (défaut: 3)
- * @returns {Promise<Object>} Les données JSON parsées depuis la réponse de Gemini
- */
 async function callGeminiAPI(prompt, date, maxRetries = 2) {
     const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const fallbackModel = modelName === 'gemini-2.5-flash' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';

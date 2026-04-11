@@ -26,7 +26,7 @@ module.exports = {
                 .addIntegerOption(option =>
                     option.setName('annee')
                         .setDescription("L'année de l'événement (optionnel, ex: 2025)")
-                        .setRequired(false)
+                        .setRequired(true)
                         .setMinValue(1900)
                         .setMaxValue(2030))
                 .addStringOption(option =>

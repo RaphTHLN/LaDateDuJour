@@ -1,24 +1,32 @@
-const { callGeminiAPI } = require('../gemini_helper');
+const { getWikipediaEvents } = require('../wikipedia_helper');
+const { getCache, setCache } = require('../cache_manager');
 
 module.exports.getSection = async (date, ladatedujour) => {
-    const prompt = `Tu es un expert en histoire. Pour la date donnée, fournis 5 événements historiques importants qui se sont produits à cette date (jour et mois) au cours de l'histoire, mais pas nécessairement la même année.
-
-Format de réponse JSON requis:
-{
-  "evenements": [
-    {
-      "year": 1234,
-      "text": "Description de l'événement"
-    }
-  ]
-}
-
-Les événements doivent être variés (différentes époques) et importants. Trie-les par année croissante.`;
-
     try {
-        const response = await callGeminiAPI(prompt, date);
-        const evenements = response.evenements || [];
-        
+        const jour = date.getDate();
+        const mois = date.getMonth() + 1;
+
+        // Vérifier le cache d'abord
+        let evenements = getCache(jour, mois, 'events');
+
+        if (!evenements) {
+            console.log('Récupération des événements depuis Wikipedia...');
+            const wikipediaData = await getWikipediaEvents(date);
+
+            if (wikipediaData.length === 0) {
+                return '';
+            }
+
+            // Garder les 5 événements les plus récents pour plus de pertinence
+            evenements = wikipediaData
+                .sort((a, b) => (b.year || 0) - (a.year || 0))
+                .slice(0, 5)
+                .sort((a, b) => (a.year || 0) - (b.year || 0));
+
+            // Sauvegarder en cache
+            setCache(jour, mois, 'events', evenements);
+        }
+
         const topEvenements = evenements
             .slice(0, 5)
             .map(evenement => `**${evenement.year}** : ${evenement.text}`)
@@ -26,10 +34,10 @@ Les événements doivent être variés (différentes époques) et importants. Tr
 
         const events = `### - Événements historiques :  
 
-${topEvenements} `;
+${topEvenements}`;
         return events;
     } catch (error) {
         console.error('Erreur dans le module événements historiques:', error);
         return '';
     }
-}
+};

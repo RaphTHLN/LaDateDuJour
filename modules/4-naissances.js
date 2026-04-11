@@ -1,27 +1,30 @@
-const { callGeminiAPI } = require('../gemini_helper');
+const { getWikipediaBirths } = require('../wikipedia_helper');
+const { evaluateRelevance } = require('../gemma_local_helper');
+const { getCache, setCache } = require('../cache_manager');
 
 module.exports.getSection = async (date, ladatedujour) => {
-    const prompt = `Tu es un expert en histoire et culture. Pour la date donnée, fournis 3 personnalités célèbres (personnes connues et importantes) qui sont nées à cette date (jour et mois) au cours de l'histoire.
-
-Format de réponse JSON requis:
-{
-  "naissances": [
-    {
-      "year": 1950,
-      "name": "Nom de la personnalité",
-      "url": "https://fr.wikipedia.org/wiki/Nom_de_la_personnalité",
-      "description": "Brève description de la personnalité (profession, nationalité, pourquoi elle est connue)",
-      "popularite": 10
-    }
-  ]
-}
-
-Les personnalités doivent être variées et vraiment célèbres. Le champ "popularite" doit être un nombre entre 1 et 10 indiquant l'importance de la personnalité. Trie les résultats par popularité décroissante, puis par année croissante.`;
-
     try {
-        const response = await callGeminiAPI(prompt, date);
-        const naissances = response.naissances || [];
-        
+        const jour = date.getDate();
+        const mois = date.getMonth() + 1;
+
+        // Vérifier le cache d'abord
+        let naissances = getCache(jour, mois, 'births');
+
+        if (!naissances) {
+            console.log('Récupération des naissances depuis Wikipedia...');
+            const wikipediaData = await getWikipediaBirths(date);
+
+            if (wikipediaData.length === 0) {
+                return '';
+            }
+
+            // Évaluer la pertinence avec l'IA locale
+            naissances = await evaluateRelevance(wikipediaData, 'birth');
+
+            // Sauvegarder en cache
+            setCache(jour, mois, 'births', naissances);
+        }
+
         // Trier par popularité décroissante, prendre les 3 premiers, puis trier par année croissante
         const topNaissances = naissances
             .sort((a, b) => (b.popularite || 0) - (a.popularite || 0))
@@ -29,7 +32,7 @@ Les personnalités doivent être variées et vraiment célèbres. Le champ "popu
             .sort((a, b) => (a.year || 0) - (b.year || 0))
             .map(naissance => `**${naissance.year}** : [${naissance.name}](<${naissance.url}>) ${naissance.description}`)
             .join('\n\n');
-    
+
         return `### - Anniversaires :  
 
 ${topNaissances}`;
