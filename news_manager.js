@@ -18,7 +18,13 @@ async function fetchLatestNews() {
 
         const url = `https://newsapi.org/v2/everything?q=${query}&sortBy=${sortBy}&language=${language}&pageSize=${pageSize}&apiKey=${apiKey}`;
 
-        https.get(url, (res) => {
+        const options = {
+            headers: {
+                'User-Agent': 'LaDateDuJour/2.0.0 (Discord Bot; +https://github.com/RaphTHLN/LaDateDuJour)'
+            }
+        };
+
+        https.get(url, options, (res) => {
             let data = '';
 
             res.on('data', (chunk) => {
