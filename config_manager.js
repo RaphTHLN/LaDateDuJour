@@ -13,7 +13,6 @@ function init() {
     try {
         db.pragma('journal_mode = WAL');
 
-        // Table pour les serveurs configurés
         db.prepare(`
             CREATE TABLE IF NOT EXISTS servers (
                 guild_id TEXT PRIMARY KEY,

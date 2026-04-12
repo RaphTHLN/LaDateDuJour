@@ -20,9 +20,13 @@ function getTimeToMidnight() {
     return midnight - now;
 };
 
-function getWeatherImageURL() {
-    const today = new Date();
-    today.setDate(today.getDate() + 1); 
+function getWeatherImageURL(targetDate = null) {
+    const today = targetDate ? new Date(targetDate) : new Date();
+
+    // Si pas de date spécifiée, on utilise demain
+    if (!targetDate) {
+        today.setDate(today.getDate() + 1);
+    }
 
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -68,10 +72,16 @@ async function sendMessage(message, attachment, channel) {
     console.log('Les messages sont envoyés')
 }
 
-async function generateDailyMessage() {
-    console.log("Génération du message pour demain...")
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
+async function generateDailyMessage(targetDate = null) {
+    const date = targetDate ? new Date(targetDate) : new Date();
+
+    // Si pas de date spécifiée, on génère pour demain
+    if (!targetDate) {
+        console.log("Génération du message pour demain...")
+        date.setDate(date.getDate() + 1);
+    } else {
+        console.log(`Génération du message pour ${date.toLocaleDateString('fr-FR')}...`)
+    }
 
     const messageParts = []
     for (const file of moduleFiles) {
@@ -130,7 +140,6 @@ async function laDateDuJour() {
         return;
     }
 
-    // Envoyer à chaque serveur
     for (const server of servers) {
         try {
             const channel = await client.channels.fetch(server.channel_id);
@@ -155,6 +164,50 @@ async function laDateDuJour() {
     }, 60000)
 }
 
+async function sendDailyMessageManually() {
+    console.log("=== ENVOI MANUEL DE LA DATE DU JOUR ===")
+
+    const today = new Date();
+    const message = await generateDailyMessage(today);
+    const weatherImageURL = getWeatherImageURL(today);
+    const attachment = new AttachmentBuilder(weatherImageURL);
+
+    let servers = configManager.getAllActiveServers();
+
+    if (servers.length === 0 && channelId) {
+        console.log("Aucun serveur en base de données, utilisation de la config .env");
+        servers = [{
+            guild_id: 'default',
+            channel_id: channelId,
+            role_id: process.env.ROLE_ID || null,
+            timezone: 'Europe/Paris'
+        }];
+    }
+
+    if (servers.length === 0) {
+        console.warn("Aucun canal configuré pour recevoir les messages!");
+        return;
+    }
+
+    for (const server of servers) {
+        try {
+            const channel = await client.channels.fetch(server.channel_id);
+            if (!channel) {
+                console.warn(`Canal ${server.channel_id} introuvable pour le serveur ${server.guild_id}`);
+                continue;
+            }
+
+            console.log(`Envoi du message au canal ${server.channel_id}...`);
+            await sendMessage(message, attachment, channel);
+
+        } catch (error) {
+            console.error(`Erreur lors de l'envoi au serveur ${server.guild_id}:`, error);
+        }
+    }
+
+    console.log("=== FIN DE L'ENVOI MANUEL ===")
+}
+
 client.on('ready', async () => {
     console.log(`${client.user.username} is ready!`);
 
@@ -176,11 +229,9 @@ client.on('ready', async () => {
 
     commandManager.init(client)
 
-    // Premier appel pour le jour courant
     if (process.env.DEBUG_MODE === "1") {
         laDateDuJour();
     } else {
-        // Attendre minuit pour le premier appel
         const milliseconds = getTimeToMidnight();
         console.log(`Prochain appel dans ${(milliseconds / 1000 / 60 / 60).toFixed(2)} heures`);
         setTimeout(() => {
@@ -189,7 +240,13 @@ client.on('ready', async () => {
     }
 });
 
+module.exports = {
+    sendDailyMessageManually,
+    client
+};
+
 client.login(token).catch(err => {
     console.error('Échec de connexion à Discord :', err.code || err.message || err);
     process.exit(1);
 });
+

@@ -23,17 +23,16 @@ module.exports = {
                         .setRequired(true)
                         .setMinValue(1)
                         .setMaxValue(12))
-                .addIntegerOption(option =>
-                    option.setName('annee')
-                        .setDescription("L'année de l'événement (optionnel, ex: 2025)")
-                        .setRequired(true)
-                        .setMinValue(1900)
-                        .setMaxValue(2030))
                 .addStringOption(option =>
                     option.setName('description')
                         .setDescription('Une brève description de l\'événement')
-                        .setRequired(true)
-                )
+                        .setRequired(true))
+                .addIntegerOption(option =>
+                    option.setName('annee')
+                        .setDescription("L'année de l'événement (optionnel, ex: 2025)")
+                        .setRequired(false)
+                        .setMinValue(1900)
+                        .setMaxValue(2030))
         )
         .addSubcommand(subcommand =>
             subcommand

@@ -6,7 +6,6 @@ module.exports.getSection = async (date, ladatedujour) => {
         const jour = date.getDate();
         const mois = date.getMonth() + 1;
 
-        // Vérifier le cache d'abord
         let evenements = getCache(jour, mois, 'events');
 
         if (!evenements) {
@@ -17,7 +16,6 @@ module.exports.getSection = async (date, ladatedujour) => {
                 return '';
             }
 
-            // Garder les 5 événements les plus récents pour plus de pertinence
             evenements = wikipediaData
                 .sort((a, b) => (b.year || 0) - (a.year || 0))
                 .slice(0, 5)
