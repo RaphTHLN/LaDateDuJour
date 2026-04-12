@@ -48,6 +48,14 @@ function init(client) {
             const count = await deployCommands(message.guild);
             message.channel.send(`${count} commandes ont été enregistrées.`)
         }
+        else if (message.content === "LDDJ!deployglobal") {
+            if (!config.devs.includes(message.member.id)) {
+                return message.channel.send("Vous n'avez pas la permission");
+            }
+
+            const count = await deployGlobalCommands(client);
+            message.channel.send(`🌍 ${count} commandes globales déployées ! (peut prendre du temps à apparaître)`);
+        }
         else if (message.content === "LDDJ!send") {
             if (!config.devs.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
             try {
@@ -115,6 +123,22 @@ async function deployCommands(guild) {
     }
     console.log(`${count} commandes déployées sur ${guild.name}`);
     return count;
+}
+
+async function deployGlobalCommands(client) {
+    const commands = [];
+
+    for (const file of fs.readdirSync("./slashCommands").filter(file => file.endsWith(".js"))) {
+        const cmd = require("./slashCommands/" + file);
+        if (cmd.enabled) {
+            commands.push(cmd.data.toJSON());
+        }
+    }
+
+    await client.application.commands.set(commands);
+
+    console.log(`🌍 ${commands.length} commandes déployées globalement`);
+    return commands.length;
 }
 
 module.exports = {init}

@@ -9,9 +9,6 @@ if (!fs.existsSync(dir)) {
 
 const db = new Database(path.join(dir, 'cache.db'));
 
-/**
- * Initialise la table de cache
- */
 function init() {
     try {
         db.pragma('journal_mode = WAL');
