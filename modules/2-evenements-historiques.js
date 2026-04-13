@@ -21,7 +21,6 @@ module.exports.getSection = async (date, ladatedujour) => {
                 .slice(0, 5)
                 .sort((a, b) => (a.year || 0) - (b.year || 0));
 
-            // Sauvegarder en cache
             setCache(jour, mois, 'events', evenements);
         }
 

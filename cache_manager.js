@@ -50,7 +50,6 @@ function getCache(jour, mois, type, maxAgeHours = 24 * 7) {
             return null;
         }
 
-        // Vérifier l'âge du cache
         const createdTime = new Date(result.created_at).getTime();
         const now = new Date().getTime();
         const ageHours = (now - createdTime) / (1000 * 60 * 60);

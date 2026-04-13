@@ -23,11 +23,6 @@ function getTimeToMidnight() {
 function getWeatherImageURL(targetDate = null) {
     const today = targetDate ? new Date(targetDate) : new Date();
 
-    // Si pas de date spécifiée, on utilise demain
-    if (!targetDate) {
-        today.setDate(today.getDate() + 1);
-    }
-
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
@@ -75,10 +70,8 @@ async function sendMessage(message, attachment, channel) {
 async function generateDailyMessage(targetDate = null) {
     const date = targetDate ? new Date(targetDate) : new Date();
 
-    // Si pas de date spécifiée, on génère pour demain
     if (!targetDate) {
-        console.log("Génération du message pour demain...")
-        date.setDate(date.getDate() + 1);
+        console.log("Génération du message pour aujourd'hui...")
     } else {
         console.log(`Génération du message pour ${date.toLocaleDateString('fr-FR')}...`)
     }
@@ -116,15 +109,12 @@ Anniversaires Animal Crossing : [Animal Crossing Wiki](<https://animalcrossing.f
 async function laDateDuJour() {
     console.log("=== ENVOI DES MESSAGES QUOTIDIENS ===")
 
-    // Générer le message une seule fois
     const message = await generateDailyMessage();
     const weatherImageURL = getWeatherImageURL();
     const attachment = new AttachmentBuilder(weatherImageURL);
 
-    // Récupérer tous les serveurs configurés
     let servers = configManager.getAllActiveServers();
 
-    // Fallback sur la config .env pour la rétro-compatibilité
     if (servers.length === 0 && channelId) {
         console.log("Aucun serveur en base de données, utilisation de la config .env");
         servers = [{
@@ -158,10 +148,12 @@ async function laDateDuJour() {
 
     console.log("=== FIN DE L'ENVOI ===")
 
-    // Relancer le cycle dans 1 minute
-    setTimeout(async () => {
-        laDateDuJour()
-    }, 60000)
+    // Programmer le prochain envoi à minuit
+    const milliseconds = getTimeToMidnight();
+    console.log(`Prochain envoi dans ${(milliseconds / 1000 / 60 / 60).toFixed(2)} heures`);
+    setTimeout(() => {
+        laDateDuJour();
+    }, milliseconds);
 }
 
 async function sendDailyMessageManually() {
@@ -249,4 +241,3 @@ client.login(token).catch(err => {
     console.error('Échec de connexion à Discord :', err.code || err.message || err);
     process.exit(1);
 });
-

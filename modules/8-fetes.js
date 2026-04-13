@@ -1,8 +1,6 @@
 const { getCache, setCache } = require('../cache_manager');
 
-// Base de données statique des fêtes et journées internationales
 const festivitiesDatabase = {
-    // Format: "jour-mois": ["fête1", "fête2", ...]
     "1-1": ["Jour de l'an", "Journée mondiale de la paix"],
     "1-2": ["Journée internationale de la non-violence"],
     "1-3": ["Journée mondiale des zones humides"],
@@ -67,18 +65,15 @@ module.exports.getSection = async (date, ladatedujour) => {
         const mois = date.getMonth() + 1;
         const dateKey = `${jour}-${mois}`;
 
-        // Vérifier le cache d'abord
         let fetes = getCache(jour, mois, 'celebrations');
 
         if (!fetes) {
             console.log('Récupération des fêtes depuis la base de données...');
 
-            // Récupérer de notre base de données
             const festivities = festivitiesDatabase[dateKey] || [];
 
             fetes = festivities.map(text => ({ text }));
 
-            // Sauvegarder en cache
             if (fetes.length > 0) {
                 setCache(jour, mois, 'celebrations', fetes);
             }
