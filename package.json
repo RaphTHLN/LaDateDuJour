@@ -28,8 +28,6 @@
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "google-trends-api-code": "^4.9.10",
-    "package-lock.json": "^1.0.0",
-    "package.json": "^2.0.1",
     "wikipedia": "^2.1.2"
   },
   "engines": {
