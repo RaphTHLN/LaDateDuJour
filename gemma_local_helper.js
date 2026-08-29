@@ -1,5 +1,6 @@
 const http = require('http');
 const https = require('https');
+const { createScoresSchema, parseStructuredResponse, runAIAttemptCycle } = require('./ai_validation');
 
 function isLocalAIEnabled() {
     return process.env.LOCAL_AI_ENABLED === '1' || process.env.LOCAL_AI_ENABLED === 'true';
@@ -94,15 +95,11 @@ Réponds UNIQUEMENT avec un JSON valide sous cette forme (aucun texte avant ou a
 }`;
 
         console.log('Appel à l\'IA locale pour évaluer la pertinence...');
-        const response = await callOllamaAPI(prompt);
-
-        // Extraire JSON de la réponse
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            throw new Error('No JSON found in response');
-        }
-
-        const parsed = JSON.parse(jsonMatch[0]);
+        const schema = createScoresSchema(people.map(person => person.name));
+        const parsed = await runAIAttemptCycle(async () => {
+            const response = await callOllamaAPI(prompt);
+            return parseStructuredResponse(response, schema);
+        });
         const scores = new Map(parsed.scores.map(s => [s.name, s.score]));
 
         return people.map(p => ({
@@ -110,20 +107,23 @@ Réponds UNIQUEMENT avec un JSON valide sous cette forme (aucun texte avant ou a
             popularite: scores.get(p.name) || 5
         }));
     } catch (error) {
-        console.warn('Erreur lors de l\'évaluation par l\'IA locale, utilisation du fallback:', error.message);
-        // Fallback: score basique
-        return people.map(p => ({
-            ...p,
-            popularite: Math.min(10, Math.max(1, Math.floor((p.description || '').split(' ').length / 5)))
-        }));
+        console.warn('Erreur lors de l\'évaluation par l\'IA locale:', error.message);
+        throw error;
     }
+}
+
+function applyRelevanceFallback(people) {
+    return people.map(person => ({
+        ...person,
+        popularite: Math.min(10, Math.max(1, Math.floor((person.description || '').split(' ').length / 5)))
+    }));
 }
 
 module.exports = {
     isLocalAIEnabled,
     getLocalAIConfig,
     callOllamaAPI,
-    evaluateRelevance
+    evaluateRelevance,
+    applyRelevanceFallback
 };
-
 

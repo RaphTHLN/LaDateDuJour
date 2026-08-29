@@ -1,22 +1,44 @@
 const { Client } = require("discord.js")
 const fs = require("fs")
 const slashCommands = {}
-let config
+let config = {}
+
+function isDevelopmentMode() {
+    return process.env.DEBUG_MODE === "1" || process.env.DEBUG_MODE === "true";
+}
+
+function loadCommands() {
+    if (!fs.existsSync("./slashCommands")) {
+        console.warn("Dossier slashCommands introuvable.");
+        return;
+    }
+
+    for (const file of fs.readdirSync("./slashCommands").filter(name => name.endsWith(".js"))) {
+        const command = require("./slashCommands/" + file);
+        if (!command.enabled) continue;
+        console.log("Loaded " + file);
+        slashCommands[file.split(".")[0]] = command;
+    }
+}
 
 /**
  *
  * @param {Client} client
  * @returns
  */
-function init(client) {
+async function init(client) {
     config = fs.existsSync("./config.json") ? require("./config.json") : {}
-    if (!config.devs) return console.warn("No dev id set in the config. \n Skipping command manager startup...")
-    if (fs.existsSync("./slashCommands")) {
-        for (const file of fs.readdirSync("./slashCommands").filter(name => name.endsWith(".js"))) {
-            const command = require("./slashCommands/" + file)
-            if (!command.enabled) continue
-            console.log("Loaded " + file)
-            slashCommands[file.split(".")[0]] = command
+
+    loadCommands();
+
+    if (!isDevelopmentMode()) {
+        try {
+            const count = await deployGlobalCommands(client);
+            console.log(`🌍 ${count} commandes globales synchronisées automatiquement.`);
+        } catch (error) {
+            // Command execution and the daily scheduler must still start if Discord
+            // temporarily rejects command registration.
+            console.error("Erreur lors de la synchronisation automatique des commandes globales:", error);
         }
     }
 
@@ -43,13 +65,13 @@ function init(client) {
         const args = message.content.slice(prefix.length).split(/ +/)
         const command = args[0]?.toLowerCase()
         if (message.content === "LDDJ!deploy") {
-            if (!config.devs.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
+            if (!config.devs?.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
             if (!fs.existsSync("./slashCommands")) return message.channel.send("Aucune commande trouvée.")
             const count = await deployCommands(message.guild);
             message.channel.send(`${count} commandes ont été enregistrées.`)
         }
         else if (message.content === "LDDJ!deployglobal") {
-            if (!config.devs.includes(message.member.id)) {
+            if (!config.devs?.includes(message.member.id)) {
                 return message.channel.send("Vous n'avez pas la permission");
             }
 
@@ -57,7 +79,7 @@ function init(client) {
             message.channel.send(`🌍 ${count} commandes globales déployées ! (peut prendre du temps à apparaître)`);
         }
         else if (message.content === "LDDJ!send") {
-            if (!config.devs.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
+            if (!config.devs?.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
             try {
                 await message.channel.send("🚀 Envoi de la date du jour sur tous les serveurs...");
                 const { sendDailyMessageManually } = require("./index.js");
@@ -69,7 +91,7 @@ function init(client) {
             }
         }
         else if (command === "actusSend") {
-            if (!config.devs.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
+            if (!config.devs?.includes(message.member.id)) return message.channel.send({content:"Vous n'avez pas la permission"})
 
             try {
                 const newsConfig = require("./news_config_manager");
@@ -141,4 +163,4 @@ async function deployGlobalCommands(client) {
     return commands.length;
 }
 
-module.exports = {init}
+module.exports = { init, isDevelopmentMode, deployGlobalCommands }

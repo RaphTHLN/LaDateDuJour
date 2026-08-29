@@ -1,0 +1,12 @@
+services:
+  ladatedujour:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      # Keeps SQLite configuration, cache and birthdays across redeployments.
+      - ladatedujour-data:/app/data
+
+volumes:
+  ladatedujour-data:

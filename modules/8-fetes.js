@@ -59,7 +59,7 @@ const festivitiesDatabase = {
     "26-12": ["Saint-Étienne", "Kwanzaa"]
 };
 
-module.exports.getSection = async (date, ladatedujour) => {
+module.exports.getSection = async date => {
     try {
         const jour = date.getDate();
         const mois = date.getMonth() + 1;
@@ -80,16 +80,16 @@ module.exports.getSection = async (date, ladatedujour) => {
         }
 
         if (fetes.length === 0) {
-            return '';
+            return null;
         }
 
         const topFetes = fetes
             .map(fete => `${fete.text}`)
             .join('\n');
 
-        return "### - Fêtes et Journées Internationales :   \n" + topFetes;
+        return { id: 'celebrations', title: 'Fêtes et Journées Internationales', content: topFetes };
     } catch (error) {
         console.error('Erreur dans le module fêtes:', error);
-        return '';
+        return null;
     }
 };

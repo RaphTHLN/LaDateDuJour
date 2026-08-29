@@ -16,65 +16,50 @@ function makeWikipediaRequest(url) {
     });
 }
 
-async function getWikipediaEvents(date) {
+async function getOnThisDay(date, type) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
-
-    const url = `https://fr.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`;
+    const url = `https://fr.wikipedia.org/api/rest_v1/feed/onthisday/${type}/${month}/${day}`;
 
     try {
         const data = await makeWikipediaRequest(url);
-        return (data.events || []).map(event => ({
-            year: event.year,
-            text: event.text.replace(/\[\[/g, '').replace(/]]/g, ''),
-            url: event.pages?.[0]?.content_urls?.desktop?.page || '#'
-        }));
+        return data[type] || [];
     } catch (error) {
-        console.error('Erreur lors de la récupération des événements Wikipedia:', error.message);
+        console.error(`Erreur lors de la récupération Wikipedia (${type}):`, error.message);
         return [];
     }
+}
+
+function cleanWikipediaText(value = '') {
+    return value.replace(/\[\[/g, '').replace(/]]/g, '');
+}
+
+function mapPerson(person) {
+    const description = cleanWikipediaText(person.text);
+    const page = person.pages?.[0];
+    return {
+        year: person.year,
+        name: description.split(',')[0].trim(),
+        description,
+        url: page?.content_urls?.desktop?.page || `https://fr.wikipedia.org/wiki/${page?.title || ''}`,
+        titleUrl: page?.title || ''
+    };
+}
+
+async function getWikipediaEvents(date) {
+    return (await getOnThisDay(date, 'events')).map(event => ({
+        year: event.year,
+        text: cleanWikipediaText(event.text),
+        url: event.pages?.[0]?.content_urls?.desktop?.page || '#'
+    }));
 }
 
 async function getWikipediaBirths(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-
-    const url = `https://fr.wikipedia.org/api/rest_v1/feed/onthisday/births/${month}/${day}`;
-
-    try {
-        const data = await makeWikipediaRequest(url);
-        return (data.births || []).map(birth => ({
-            year: birth.year,
-            name: birth.text.replace(/\[\[/g, '').replace(/]]/g, '').split(',')[0].trim(),
-            description: birth.text.replace(/\[\[/g, '').replace(/]]/g, ''),
-            url: birth.pages?.[0]?.content_urls?.desktop?.page || `https://fr.wikipedia.org/wiki/${birth.pages?.[0]?.title || ''}`,
-            titleUrl: birth.pages?.[0]?.title || ''
-        }));
-    } catch (error) {
-        console.error('Erreur lors de la récupération des naissances Wikipedia:', error.message);
-        return [];
-    }
+    return (await getOnThisDay(date, 'births')).map(mapPerson);
 }
 
 async function getWikipediaDeaths(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    
-    const url = `https://fr.wikipedia.org/api/rest_v1/feed/onthisday/deaths/${month}/${day}`;
-    
-    try {
-        const data = await makeWikipediaRequest(url);
-        return (data.deaths || []).map(death => ({
-            year: death.year,
-            name: death.text.replace(/\[\[/g, '').replace(/]]/g, '').split(',')[0].trim(),
-            description: death.text.replace(/\[\[/g, '').replace(/]]/g, ''),
-            url: death.pages?.[0]?.content_urls?.desktop?.page || `https://fr.wikipedia.org/wiki/${death.pages?.[0]?.title || ''}`,
-            titleUrl: death.pages?.[0]?.title || ''
-        }));
-    } catch (error) {
-        console.error('Erreur lors de la récupération des décès Wikipedia:', error.message);
-        return [];
-    }
+    return (await getOnThisDay(date, 'deaths')).map(mapPerson);
 }
 
 async function searchWikipedia(query) {
@@ -101,4 +86,3 @@ module.exports = {
     getWikipediaDeaths,
     searchWikipedia
 };
-

@@ -1,7 +1,7 @@
 const { getWikipediaEvents } = require('../wikipedia_helper');
 const { getCache, setCache } = require('../cache_manager');
 
-module.exports.getSection = async (date, ladatedujour) => {
+module.exports.getSection = async date => {
     try {
         const jour = date.getDate();
         const mois = date.getMonth() + 1;
@@ -13,7 +13,7 @@ module.exports.getSection = async (date, ladatedujour) => {
             const wikipediaData = await getWikipediaEvents(date);
 
             if (wikipediaData.length === 0) {
-                return '';
+                return null;
             }
 
             evenements = wikipediaData
@@ -29,12 +29,9 @@ module.exports.getSection = async (date, ladatedujour) => {
             .map(evenement => `**${evenement.year}** : ${evenement.text}`)
             .join('\n\n');
 
-        const events = `### - Événements historiques :  
-
-${topEvenements}`;
-        return events;
+        return { id: 'events', title: 'Événements historiques', content: topEvenements };
     } catch (error) {
         console.error('Erreur dans le module événements historiques:', error);
-        return '';
+        return null;
     }
 };

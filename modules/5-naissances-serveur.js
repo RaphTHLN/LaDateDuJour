@@ -1,7 +1,7 @@
 const db = require("../database_manager")
 
 
-module.exports.getSection = async (date, ladatedujour) => {
+module.exports.getSection = async date => {
     
     let anniversairesMessage = '';
     for (const element of db.getBirthday(date.getDate(), date.getMonth() + 1)) { // JS start month indexing at 0
@@ -9,5 +9,7 @@ module.exports.getSection = async (date, ladatedujour) => {
     }
     
     return anniversairesMessage
+        ? { id: 'server-birthdays', title: 'Anniversaires du serveur', content: anniversairesMessage.trim() }
+        : null;
 
 };

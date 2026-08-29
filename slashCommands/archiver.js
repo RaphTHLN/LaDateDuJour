@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { extractComponentText } = require('../daily_renderer');
 
 module.exports = {
     enabled: true,
@@ -23,12 +24,14 @@ module.exports = {
             const messages = await interaction.channel.messages.fetch({ limit: 10 });
 
             // Trouver le message qui contient le calendrier (cherche les sections)
-            const calendarMsg = messages.find(msg =>
-                msg.author.id === interaction.client.user.id &&
-                (msg.content.includes('Événements historiques') ||
-                 msg.content.includes('Anniversaires') ||
-                 msg.content.includes('Fêtes et Journées'))
-            );
+            const calendarMsg = messages.find(message => {
+                if (message.author.id !== interaction.client.user.id) return false;
+                const searchableText = `${message.content || ''}\n${extractComponentText(message.components)}`;
+                return searchableText.includes('Nous sommes le') ||
+                    searchableText.includes('Événements historiques') ||
+                    searchableText.includes('Fêtes et Journées') ||
+                    searchableText.includes('Envoyé par');
+            });
 
             if (!calendarMsg) {
                 return interaction.editReply({
@@ -45,6 +48,7 @@ module.exports = {
                 day: 'numeric'
             });
 
+            const archivedContent = extractComponentText(calendarMsg.components) || calendarMsg.content;
             const embed = new EmbedBuilder()
                 .setColor(0x06b6d4)
                 .setTitle(`📅 Archive du calendrier`)
@@ -60,7 +64,7 @@ module.exports = {
                     },
                     {
                         name: 'Contenu',
-                        value: calendarMsg.content.substring(0, 1024) + (calendarMsg.content.length > 1024 ? '...' : '')
+                        value: archivedContent.substring(0, 1024) + (archivedContent.length > 1024 ? '...' : '')
                     }
                 )
                 .setFooter({ text: 'Archive créée via /archiver' })
@@ -86,4 +90,3 @@ module.exports = {
         }
     }
 };
-

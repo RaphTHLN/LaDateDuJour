@@ -53,7 +53,7 @@ function addOrUpdateServer(guildId, channelId, roleId = null, timezone = 'Europe
 
 function getServer(guildId) {
     try {
-        const stmt = db.prepare('SELECT * FROM servers WHERE guild_id = ? AND enabled = 1');
+        const stmt = db.prepare('SELECT * FROM servers WHERE guild_id = ?');
         return stmt.get(guildId);
     } catch (error) {
         console.error("Erreur lors de la récupération du serveur :", error);
@@ -115,4 +115,3 @@ module.exports = {
     enableServer,
     deleteServer
 };
-

@@ -25,6 +25,14 @@ module.exports = {
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
+                .setName('fuseau')
+                .setDescription('Définir le fuseau horaire IANA du serveur')
+                .addStringOption(option =>
+                    option.setName('timezone')
+                        .setDescription('Exemple : Europe/Paris, Europe/Zurich ou America/Montreal')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
                 .setName('voir')
                 .setDescription('Affiche la configuration actuelle'))
         .addSubcommand(subcommand =>
@@ -55,7 +63,13 @@ module.exports = {
             const channel = interaction.options.getChannel('canal');
 
             try {
-                configManager.addOrUpdateServer(guildId, channel.id);
+                const current = configManager.getServer(guildId);
+                configManager.addOrUpdateServer(
+                    guildId,
+                    channel.id,
+                    current?.role_id || null,
+                    current?.timezone || 'Europe/Paris'
+                );
 
                 const embed = new EmbedBuilder()
                     .setColor(0x10b981)
@@ -85,7 +99,12 @@ module.exports = {
             }
 
             try {
-                configManager.addOrUpdateServer(guildId, server.channel_id, role?.id || null);
+                configManager.addOrUpdateServer(
+                    guildId,
+                    server.channel_id,
+                    role?.id || null,
+                    server.timezone || 'Europe/Paris'
+                );
 
                 const embed = new EmbedBuilder()
                     .setColor(0x10b981)
@@ -101,6 +120,32 @@ module.exports = {
                     flags: MessageFlags.Ephemeral
                 });
             }
+        }
+
+        if (subcommand === 'fuseau') {
+            const timezone = interaction.options.getString('timezone');
+            const server = configManager.getServer(guildId);
+            if (!server) {
+                return interaction.reply({
+                    content: '❌ Aucun canal n’est configuré. Utilisez `/configurer canal` d’abord.',
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+
+            try {
+                new Intl.DateTimeFormat('fr-FR', { timeZone: timezone }).format();
+            } catch {
+                return interaction.reply({
+                    content: `❌ Le fuseau \`${timezone}\` n’est pas un fuseau IANA valide.`,
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+
+            configManager.addOrUpdateServer(guildId, server.channel_id, server.role_id, timezone);
+            return interaction.reply({
+                content: `✅ Fuseau horaire mis à jour : \`${timezone}\`.`,
+                flags: MessageFlags.Ephemeral
+            });
         }
 
         if (subcommand === 'voir') {
@@ -185,4 +230,3 @@ module.exports = {
         }
     }
 };
-

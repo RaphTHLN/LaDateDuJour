@@ -4,6 +4,8 @@
 
 Un bot Discord qui envoie chaque jour un message récapitulatif avec les événements historiques, anniversaires, décès notables et fêtes du jour.
 
+> Prérequis : Node.js 24.11 ou plus récent.
+
 ## 🎯 Fonctionnalités
 
 - **Événements historiques** : Récupération depuis Wikipedia API (gratuit & illimité)
@@ -21,7 +23,9 @@ Un bot Discord qui envoie chaque jour un message récapitulatif avec les événe
 - `LOCAL_AI_ENABLED` : `1` pour activer l'IA locale (Ollama), `0` pour désactiver
 - `LOCAL_AI_URL` : URL du serveur Ollama (défaut: http://localhost:11434)
 - `LOCAL_AI_MODEL` : Modèle à utiliser (défaut: gemma2)
-- `GEMINI_API_KEY` : Clé API Google Gemini (optionnel, n'est plus utilisée par défaut)
+- `GEMINI_API_KEY` : Clé API Google Gemini utilisée pour les résumés d'actualités
+- `GEMINI_MODEL` : Modèle Gemini utilisé pour les résumés (défaut : `gemini-2.5-flash`)
+- `AI_TIMEOUT_MS` : Délai maximal d'un appel IA avant nouvelle tentative (défaut : `20000`)
 
 ## 🛠️ Commandes disponibles
 
@@ -38,6 +42,7 @@ Un bot Discord qui envoie chaque jour un message récapitulatif avec les événe
 ### Commandes administrateur
 - `/configurer canal` : Définir le canal d'envoi des messages
 - `/configurer role` : Définir le rôle à mentionner
+- `/configurer fuseau <timezone>` : Définir le fuseau IANA utilisé pour la préparation à 23 h et l'envoi à minuit
 - `/configurer voir` : Afficher la configuration du serveur
 - `/configurer activer` : Activer les envois pour ce serveur
 - `/configurer desactiver` : Désactiver les envois pour ce serveur
