@@ -98,8 +98,12 @@ function createDailyScheduler({
                     preparations.set(targetKey, preparation);
                     for (const server of unsentServers) {
                         const sentKey = `${server.guild_id}:${targetKey}`;
-                        await send(server, sections, preparation.date);
-                        sent.add(sentKey);
+                        try {
+                            await send(server, sections, preparation.date);
+                            sent.add(sentKey);
+                        } catch (error) {
+                            console.error(`Erreur lors de l'envoi au serveur ${server.guild_id}:`, error);
+                        }
                     }
                 }
             }

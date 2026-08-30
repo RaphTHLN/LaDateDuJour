@@ -103,3 +103,45 @@ test('un démarrage après minuit prépare directement avec les fallbacks', asyn
     assert.deepEqual(receivedOptions, { fallbackAI: true });
     assert.equal(sends, 1);
 });
+
+test('un envoi échoué ne bloque pas les autres serveurs et peut être retenté', async () => {
+    const attempts = [];
+    let firstServerFails = true;
+    const originalConsoleError = console.error;
+    console.error = () => {};
+
+    try {
+        const scheduler = createDailyScheduler({
+            getServers: () => [
+                { guild_id: 'en-echec', timezone: 'UTC' },
+                { guild_id: 'succes', timezone: 'UTC' }
+            ],
+            now: () => new Date('2026-08-22T00:30:00.000Z'),
+            prepare: async date => ({
+                date,
+                pending: new Set(),
+                sections: new Map(),
+                lastCycleAt: new Date()
+            }),
+            finalize: async () => [],
+            send: async server => {
+                attempts.push(server.guild_id);
+                if (server.guild_id === 'en-echec' && firstServerFails) {
+                    firstServerFails = false;
+                    throw new Error('Discord indisponible');
+                }
+            }
+        });
+
+        await scheduler.tick();
+        assert.deepEqual(attempts, ['en-echec', 'succes']);
+        assert.equal(scheduler.sent.has('en-echec:2026-08-22'), false);
+        assert.equal(scheduler.sent.has('succes:2026-08-22'), true);
+
+        await scheduler.tick();
+        assert.deepEqual(attempts, ['en-echec', 'succes', 'en-echec']);
+        assert.equal(scheduler.sent.has('en-echec:2026-08-22'), true);
+    } finally {
+        console.error = originalConsoleError;
+    }
+});
